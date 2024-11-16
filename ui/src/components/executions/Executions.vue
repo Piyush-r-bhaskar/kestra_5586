@@ -212,7 +212,7 @@
                             <template #default="scope">
                                 <router-link
                                     :to="{name: 'flows/update', params: {namespace: scope.row.namespace, id: scope.row.flowId}}"
-                                    class="me-1"
+                                    class="me-1 link"
                                 >
                                     {{ $filters.invisibleSpace(scope.row.flowId) }}
                                 </router-link>
@@ -233,7 +233,7 @@
                             :label="$t('state')"
                         >
                             <template #default="scope">
-                                <status :status="scope.row.state.current" size="small" />
+                                <status :status="scope.row.state.current" class="me-1" size="small" />
                             </template>
                         </el-table-column>
 
@@ -326,7 +326,7 @@
                     :value="item.code"
                 >
                     <template #default>
-                        <status size="small" :label="false" class="me-1" :status="item.code" />
+                        <status size="small" :label="false" :status="item.code" />
                         <span v-html="item.label" />
                     </template>
                 </el-option>
@@ -987,17 +987,17 @@
         color: #ffb703;
     }
 }
-.me-1 {
-    color: gray;
+.link {
+    color: var(--bs-body-color);
     &:hover{
-        color: rgba(var(--bs-link-color-rgb));
+        color: var(--bs-link-hover-color);
     }
 } 
-html.dark .me-1 {
-    color: var(--bs-tertiary-color)
+html.dark .link {
+    color: var(--bs-body-color)
     
     &:hover{
-        color: rgba(var(--bs-link-color-rgb));
+        color: var(--bs-link-hover-color);
     }
 }
 </style>
