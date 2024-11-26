@@ -29,7 +29,7 @@
                         </el-select>
                     </el-form-item>
                     <el-form-item>
-                        <refresh-button class="float-right" @refresh="load(onDataLoaded)" />
+                        <refresh-button @refresh="load(onDataLoaded)" />
                     </el-form-item>
                 </template>
                 <template #table>
@@ -37,7 +37,6 @@
                         :data="triggersMerged"
                         ref="selectTable"
                         :default-sort="{prop: 'flowId', order: 'ascending'}"
-                        stripe
                         table-layout="auto"
                         fixed
                         @sort-change="onSort"
@@ -163,9 +162,9 @@
                         </el-table-column>
                         <el-table-column :label="$t('cron')">
                             <template #default="scope">
-                                <Cron :cron-expression="scope.row.cron" />
+                                <Cron v-if="scope.row.cron" :cron-expression="scope.row?.cron" />
                             </template>
-                        </el-table-column>  
+                        </el-table-column>
                         <el-table-column :label="$t('details')">
                             <template #default="scope">
                                 <TriggerAvatar

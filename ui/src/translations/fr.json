@@ -976,6 +976,20 @@
     "item": "élément",
     "items": "éléments",
     "warning": "Avertissement",
-    "cron": "Cron"
+    "cron": "Cron",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "documentationMenu": "Menu de documentation",
+    "task run id": "ID d'exécution de tâche",
+    "execution failed": "L'exécution a échoué, cliquez ici pour plus de détails.",
+    "optional": "Optionnel",
+    "active": "Actif",
+    "contextBar": {
+      "news": "Nouvelles",
+      "issue": "Ouvrir un Issue",
+      "docs": "Docs",
+      "demo": "Obtenez une démo",
+      "help": "Aide"
+    }
   }
 }

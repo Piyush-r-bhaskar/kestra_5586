@@ -976,6 +976,20 @@
     "item": "Element",
     "items": "Elemente",
     "warning": "Warnung",
-    "cron": "Cron"
+    "cron": "Cron",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Es scheint, dass der Text, den Sie übersetzen möchten, nicht bereitgestellt wurde. Bitte geben Sie den Text nach der Linie \"----------\" ein, damit ich Ihnen bei der Übersetzung ins Deutsche helfen kann.",
+    "documentationMenu": "Dokumentationsmenü",
+    "task run id": "TaskRun-ID",
+    "execution failed": "Die Ausführung ist fehlgeschlagen, klicken Sie hier für weitere Details.",
+    "optional": "Optional",
+    "active": "Aktiv",
+    "contextBar": {
+      "news": "Nachrichten",
+      "issue": "Ein Issue öffnen",
+      "docs": "Dokumentation",
+      "demo": "Demo anfordern",
+      "help": "Hilfe"
+    }
   }
 }
