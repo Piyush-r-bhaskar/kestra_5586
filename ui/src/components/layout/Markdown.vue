@@ -187,6 +187,16 @@
                 }
             }
         }
+
+        h1 img {
+            -webkit-filter: none;
+            filter: none;
+        
+            html.dark & {
+                -webkit-filter: invert(100%);
+                filter: invert(100%);
+            }
+        }
     }
     .markdown-tooltip {
         *:last-child {
