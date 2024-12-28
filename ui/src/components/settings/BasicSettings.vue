@@ -131,6 +131,8 @@
                             @change="onEnvNameChange"
                             :placeholder="$t('name')"
                             clearable
+                            show-word-limit
+                            maxlength="15"
                         />
                     </Column>
 
@@ -561,5 +563,13 @@
 <style>
     .el-input-number {
         max-width: 20vw;
+    }
+
+    .el-input__count {
+        color: var(--bs-white) !important;
+        
+        .el-input__count-inner {
+            background: none !important;
+        }
     }
 </style>
