@@ -677,6 +677,9 @@
         "copy": "Copy path",
         "success": "Path copied to clipboard",
         "error": "Error(s) occurred while copying the path to clipboard"
+      },
+      "validation": {
+        "no_spaces": "Spaces are not allowed in File(s) / Folder(s) names"
       }
     },
     "continue backfill": "Continue the backfill",

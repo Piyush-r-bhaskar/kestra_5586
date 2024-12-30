@@ -367,6 +367,7 @@
     import FolderDownloadOutline from "vue-material-design-icons/FolderDownloadOutline.vue";
 
     import TypeIcon from "../utils/icons/Type.vue";
+    import {ElNotification} from "element-plus";
 
     const DIALOG_DEFAULTS = {
         visible: false,
@@ -573,7 +574,22 @@
                 this.dropdownRef = reference;
                 this.$refs[reference].handleOpen();
             },
+            validateName(name) {
+                return !/\s/.test(name);
+            },
+            showErrorNotification(message) {
+                ElNotification.error({
+                    title: this.$t("error"),
+                    message: message,
+                    duration: 2500,
+                    position: "bottom-right",
+                });
+            },
             dialogHandler() {
+                if (!this.validateName(this.dialog.name)) {
+                    this.showErrorNotification(this.$t("namespace files.validation.no_spaces"));
+                    return;
+                }
                 if(this.dialog.type === "file"){
                     this.addFile({creation: true})
                 } else {
@@ -617,6 +633,10 @@
                 }
             },
             renameItem() {
+                if (!this.validateName(this.renameDialog.name)) {
+                    this.showErrorNotification(this.$t("namespace files.validation.no_spaces"));
+                    return;
+                }
                 const path = this.getPath(this.renameDialog.node);
                 const start = path.substring(0, path.lastIndexOf("/") + 1);
 
@@ -668,9 +688,15 @@
             },
             async importFiles(event) {
                 const importedFiles = event.target.files;
+                let hasErrors = false;
 
                 try {
                     for (const file of importedFiles) {
+                        if (/\s/.test(file.name)) {
+                            this.showErrorNotification(this.$t("namespace files.validation.no_spaces"));
+                            hasErrors = true;
+                            continue;
+                        }
                         if (file.webkitRelativePath) {
                             const filePath = file.webkitRelativePath;
                             const pathParts = filePath.split("/");
@@ -756,11 +782,15 @@
                         }
                     }
 
-                    this.$toast().success(
-                        this.$t("namespace files.import.success"),
-                    );
+                    if (!hasErrors) {
+                        this.$toast().success(
+                            this.$t("namespace files.import.success"),
+                        );
+                    }
                 } catch {
-                    this.$toast().error(this.$t("namespace files.import.error"));
+                    this.$toast().error(
+                        this.$t("namespace files.import.error")
+                    );
                 } finally {
                     event.target.value = "";
                     this.import = "file";
