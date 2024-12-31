@@ -85,6 +85,13 @@
                 :infos="flowInfos"
             />
 
+            <el-button
+                v-if="!isNamespace"
+                :icon="Download"
+                @click="exportYaml"
+                class="mx-2"
+            />
+
             <EditorButtons
                 v-if="isCreating || openedTabs.length"
                 :is-creating="props.isCreating"
@@ -108,6 +115,7 @@
                 @open-new-error="isNewErrorOpen = true"
                 @open-new-trigger="isNewTriggerOpen = true"
                 @open-edit-metadata="isEditMetadataOpen = true"
+                @export-yaml="exportYaml"
                 :is-namespace="isNamespace"
             />
         </div>
@@ -304,6 +312,7 @@
     import MenuClose from "vue-material-design-icons/MenuClose.vue";
     import Close from "vue-material-design-icons/Close.vue";
     import CircleMedium from "vue-material-design-icons/CircleMedium.vue";
+    import Download from "vue-material-design-icons/Download.vue";
 
     import TypeIcon from "../utils/icons/Type.vue"
 
@@ -1263,6 +1272,15 @@
 
     const closeTabsToRight = (index) => {
         closeTabs(openedTabs.value.slice(index + 1).filter(tab => tab !== FLOW_TAB.value), openedTabs.value[index]);
+    };
+
+    const exportYaml = () => {
+        const yamlContent = flowYaml.value;
+        const blob = new Blob([yamlContent], {type: "text/yaml"});
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "flow.yaml";
+        link.click();
     };
 </script>
 

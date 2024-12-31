@@ -8,6 +8,14 @@
             <template #dropdown>
                 <el-dropdown-menu class="m-dropdown-menu">
                     <el-dropdown-item
+                        v-if="isAllowedEdit"
+                        :icon="Download"
+                        size="large"
+                        @click="forwardEvent('export-yaml', null)"
+                    >
+                        {{ $t("export as yaml") }}
+                    </el-dropdown-item>
+                    <el-dropdown-item
                         v-if="!isCreating && canDelete"
                         :icon="Delete"
                         size="large"
@@ -75,6 +83,7 @@
     import LightningBolt from "vue-material-design-icons/LightningBolt.vue";
     import FileEdit from "vue-material-design-icons/FileEdit.vue";
     import ContentSave from "vue-material-design-icons/ContentSave.vue";
+    import Download from "vue-material-design-icons/Download.vue";
 </script>
 <script>
     import {defineComponent} from "vue";
@@ -86,7 +95,8 @@
             "open-new-error",
             "open-new-trigger",
             "open-edit-metadata",
-            "save"
+            "save",
+            "export-yaml"
         ],
         props: {
             isCreating: {
