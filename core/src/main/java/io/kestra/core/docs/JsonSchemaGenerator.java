@@ -28,6 +28,7 @@ import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.Output;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.models.tasks.common.EncryptedString;
+import io.kestra.core.models.tasks.logs.LogExporter;
 import io.kestra.core.models.tasks.runners.TaskRunner;
 import io.kestra.core.models.triggers.AbstractTrigger;
 import io.kestra.core.plugins.PluginRegistry;
@@ -80,6 +81,7 @@ public class JsonSchemaGenerator {
                 objectNode.put("type", "array");
             }
             replaceAnyOfWithOneOf(objectNode);
+            pullOfDefaultFromOneOf(objectNode);
 
             return JacksonMapper.toMap(objectNode);
         } catch (IllegalArgumentException e) {
@@ -87,10 +89,34 @@ public class JsonSchemaGenerator {
         }
     }
 
-    private static void replaceAnyOfWithOneOf(ObjectNode objectNode) {
+    private void replaceAnyOfWithOneOf(ObjectNode objectNode) {
         objectNode.findParents("anyOf").forEach(jsonNode -> {
             if (jsonNode instanceof ObjectNode oNode) {
                 oNode.set("oneOf", oNode.remove("anyOf"));
+            }
+        });
+    }
+
+    // This hack exists because for Property we generate a oneOf for properties that are not strings.
+    // By default, the 'default' is in each oneOf which Monaco editor didn't take into account.
+    // So, we pull off the 'default' from any of the oneOf to the parent.
+    private void pullOfDefaultFromOneOf(ObjectNode objectNode) {
+        objectNode.findParents("oneOf").forEach(jsonNode -> {
+            if (jsonNode instanceof ObjectNode oNode) {
+                JsonNode oneOf = oNode.get("oneOf");
+                if (oneOf instanceof ArrayNode arrayNode) {
+                    Iterator<JsonNode> it = arrayNode.elements();
+                    JsonNode defaultNode = null;
+                    while (it.hasNext() && defaultNode == null) {
+                        JsonNode next = it.next();
+                        if (next instanceof ObjectNode nextAsObj) {
+                            defaultNode = nextAsObj.get("default");
+                        }
+                    }
+                    if (defaultNode != null) {
+                        oNode.set("default", defaultNode);
+                    }
+                }
             }
         });
     }
@@ -482,6 +508,13 @@ public class JsonSchemaGenerator {
                 .filter(Predicate.not(io.kestra.core.models.Plugin::isInternal))
                 .flatMap(clz -> safelyResolveSubtype(declaredType, clz, typeContext).stream())
                 .toList();
+        } else if (declaredType.getErasedType() == LogExporter.class) {
+            return getRegisteredPlugins()
+                .stream()
+                .flatMap(registeredPlugin -> registeredPlugin.getLogExporters().stream())
+                .filter(Predicate.not(io.kestra.core.models.Plugin::isInternal))
+                .flatMap(clz -> safelyResolveSubtype(declaredType, clz, typeContext).stream())
+                .toList();
         } else if (declaredType.getErasedType() == Chart.class) {
             return getRegisteredPlugins()
                 .stream()
@@ -555,6 +588,7 @@ public class JsonSchemaGenerator {
         try {
             ObjectNode objectNode = generator.generateSchema(cls);
             replaceAnyOfWithOneOf(objectNode);
+            pullOfDefaultFromOneOf(objectNode);
 
             return JacksonMapper.toMap(extractMainRef(objectNode));
         } catch (IllegalArgumentException e) {

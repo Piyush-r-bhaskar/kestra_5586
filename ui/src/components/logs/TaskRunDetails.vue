@@ -104,7 +104,7 @@
 
 <script>
     import LogLine from "./LogLine.vue";
-    import State from "../../utils/state";
+    import {State} from "@kestra-io/ui-libs"
     import _xor from "lodash/xor";
     import _groupBy from "lodash/groupBy";
     import moment from "moment";
@@ -488,7 +488,10 @@
                             if (isEnd) {
                                 this.closeExecutionSSE();
                             }
-                            this.throttledExecutionUpdate(executionEvent);
+                            // we are receiving a first "fake" event to force initializing the connection: ignoring it
+                            if (executionEvent.lastEventId !== "start") {
+                                this.throttledExecutionUpdate(executionEvent);
+                            }
                             if (isEnd) {
                                 this.throttledExecutionUpdate.flush();
                             }
@@ -502,7 +505,10 @@
                         this.logsSSE = sse;
 
                         this.logsSSE.onmessage = event => {
-                            this.logsBuffer = this.logsBuffer.concat(JSON.parse(event.data));
+                            // we are receiving a first "fake" event to force initializing the connection: ignoring it
+                            if (event.lastEventId !== "start") {
+                                this.logsBuffer = this.logsBuffer.concat(JSON.parse(event.data));
+                            }
 
                             clearTimeout(this.timeout);
                             this.timeout = setTimeout(() => {
@@ -670,11 +676,11 @@
         }
 
         &::-webkit-scrollbar-track {
-            background: var(--card-bg);
+            background: var(--ks-background-card);
         }
 
         &::-webkit-scrollbar-thumb {
-            background: var(--bs-primary);
+            background: var(--ks-button-background-primary);
             border-radius: 0px;
         }
 
@@ -692,7 +698,7 @@
         }
 
         :deep(> .vue-recycle-scroller__item-wrapper > .vue-recycle-scroller__item-view > div) {
-            padding-bottom: var(--spacer);
+            padding-bottom: 1rem;
         }
 
         :deep(.line) {
@@ -700,10 +706,10 @@
         }
 
         .attempt-wrapper {
-            background-color: var(--bs-white);
+            background-color: var(--ks-background-card);
 
             :deep(.vue-recycle-scroller__item-view + .vue-recycle-scroller__item-view) {
-                border-top: 1px solid var(--bs-border-color);
+                border-top: 1px solid var(--ks-border-primary);
             }
 
             html.dark & {
@@ -730,10 +736,10 @@
         .log-lines {
             max-height: 50vh;
             transition: max-height 0.2s ease-out;
-            margin-top: calc(var(--spacer) / 2);
+            margin-top: .5rem;
 
             .line {
-                padding: calc(var(--spacer) / 2);
+                padding: .5rem;
 
                 &.cursor {
                     background-color: var(--bs-gray-300)
@@ -749,7 +755,7 @@
             }
 
             &::-webkit-scrollbar-thumb {
-                background: var(--bs-primary);
+                background: var(--ks-button-background-primary);
             }
         }
     }

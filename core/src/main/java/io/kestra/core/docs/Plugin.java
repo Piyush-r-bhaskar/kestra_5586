@@ -33,6 +33,8 @@ public class Plugin {
     private List<String> aliases;
     private List<String> apps;
     private List<String> appBlocks;
+    private List<String> charts;
+    private List<String> dataFilters;
     private List<PluginSubGroup.PluginCategory> categories;
     private String subGroup;
 
@@ -85,6 +87,8 @@ public class Plugin {
         plugin.taskRunners = filterAndGetClassName(registeredPlugin.getTaskRunners()).stream().filter(c -> subgroup == null || c.startsWith(subgroup)).toList();
         plugin.apps = filterAndGetClassName(registeredPlugin.getApps()).stream().filter(c -> subgroup == null || c.startsWith(subgroup)).toList();
         plugin.appBlocks = filterAndGetClassName(registeredPlugin.getAppBlocks()).stream().filter(c -> subgroup == null || c.startsWith(subgroup)).toList();
+        plugin.charts = filterAndGetClassName(registeredPlugin.getCharts()).stream().filter(c -> subgroup == null || c.startsWith(subgroup)).toList();
+        plugin.dataFilters = filterAndGetClassName(registeredPlugin.getDataFilters()).stream().filter(c -> subgroup == null || c.startsWith(subgroup)).toList();
 
         return plugin;
     }

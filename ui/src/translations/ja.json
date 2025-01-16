@@ -677,7 +677,8 @@
             "log_level": "デフォルトLogレベル",
             "log_display": "デフォルトLog表示",
             "execute_flow": "Flowを実行",
-            "execute_default_tab": "デフォルト実行タブ"
+            "execute_default_tab": "デフォルト実行タブ",
+            "editor_type": "デフォルトエディタータイプ"
           }
         },
         "theme": {
@@ -872,14 +873,17 @@
       "not_auth": "必要な権限がないため、このウィジェットを表示できません。",
       "see_all": "すべて表示",
       "success_ratio_tooltip": "成功率は、SUCCESS、CANCELLED、WARNINGの実行の合計を、終了状態にある実行の総数で割ったものです。",
-      "failure_ratio_tooltip": "失敗率は、FAILED、KILLED、および RETRIED の実行の合計を、終了状態にある実行の総数で割ったものです。"
+      "failure_ratio_tooltip": "失敗率は、FAILED、KILLED、および RETRIED の実行の合計を、終了状態にある実行の総数で割ったものです。",
+      "preview": "ダッシュボードプレビュー"
     },
     "delete_log": "ログを削除してもよろしいですか？",
     "docs": "ドキュメント",
     "behavior": "動作",
     "concurrency-view": {
       "desc_no_limit": "<strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">並行性制限</a></strong>についての詳細は、ドキュメントをご覧ください。",
-      "title_no_limit": "このFlowには制限が設定されていません。"
+      "title_no_limit": "このFlowには制限が設定されていません。",
+      "desc_no_executions": "<strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Execution</a></strong>についての詳細は、ドキュメントをご覧ください。",
+      "title_no_executions": "このFlowに対する進行中のExecutionはありません。"
     },
     "active-slots": "アクティブスロット",
     "concurrency": "並行性",
@@ -1036,6 +1040,53 @@
       "format": "「key:value」としてパラメータを入力してください。",
       "label": "フィルターを選択"
     },
-    "custom value": "カスタム value"
+    "custom value": "カスタム value",
+    "execution restarted": "この実行は{nbRestart}回再開されました。",
+    "chart": "チャート",
+    "source only": "ソースのみ",
+    "chart preview": "チャートプレビュー",
+    "execution replayed": "この実行は再実行されました。",
+    "execution replay": "この実行は<code>{originalId}</code>のリプレイです。",
+    "no_code": {
+      "fields": {
+        "main": {
+          "description": "説明",
+          "namespace": "Namespace（ネームスペース）",
+          "flow_id": "フローID"
+        },
+        "general": {
+          "plugin_defaults": "プラグインデフォルト",
+          "variables": "変数",
+          "labels": "ラベル",
+          "outputs": "出力",
+          "concurrency": "並行性",
+          "inputs": "入力",
+          "retry": "リトライ",
+          "disabled": "無効"
+        }
+      },
+      "sections": {
+        "general": "一般プロパティ",
+        "triggers": "トリガー",
+        "main": "メインプロパティ",
+        "error_handlers": "エラーハンドラー",
+        "tasks": "タスク"
+      },
+      "creation": {
+        "select": "{section}を選択してください",
+        "tasks": "タスクを追加",
+        "error handlers": "エラーハンドラーを追加",
+        "triggers": "トリガーを追加"
+      },
+      "save": {
+        "tasks": "タスクを保存",
+        "triggers": "トリガーを保存"
+      },
+      "labels": {
+        "no_code": "コードエディタなし",
+        "yaml": "YAMLエディター"
+      },
+      "adding": "+ {what}を追加"
+    }
   }
 }

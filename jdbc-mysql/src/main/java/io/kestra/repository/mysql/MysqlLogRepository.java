@@ -2,6 +2,7 @@ package io.kestra.repository.mysql;
 
 import io.kestra.core.models.executions.LogEntry;
 import io.kestra.jdbc.repository.AbstractJdbcLogRepository;
+import io.kestra.jdbc.services.JdbcFilterService;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -13,8 +14,9 @@ import java.util.Arrays;
 @MysqlRepositoryEnabled
 public class MysqlLogRepository extends AbstractJdbcLogRepository {
     @Inject
-    public MysqlLogRepository(@Named("logs") MysqlRepository<LogEntry> repository) {
-        super(repository);
+    public MysqlLogRepository(@Named("logs") MysqlRepository<LogEntry> repository,
+                              JdbcFilterService filterService) {
+        super(repository, filterService);
     }
 
     @Override

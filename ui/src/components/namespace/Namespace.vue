@@ -125,7 +125,7 @@
                         component: EditorView,
                         title: this.$t("editor"),
                         props: {
-                            tab: "editor",
+                            tab: "edit",
                             isNamespace: true,
                             namespace: this.$route.params.id,
                             isReadOnly: false,

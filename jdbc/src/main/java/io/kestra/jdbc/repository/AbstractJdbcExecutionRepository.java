@@ -4,6 +4,9 @@ import io.kestra.core.events.CrudEvent;
 import io.kestra.core.events.CrudEventType;
 import io.kestra.core.models.dashboards.ColumnDescriptor;
 import io.kestra.core.models.dashboards.DataFilter;
+import io.kestra.core.models.dashboards.filters.AbstractFilter;
+import io.kestra.core.models.dashboards.filters.Contains;
+import io.kestra.core.models.dashboards.filters.In;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.executions.TaskRun;
 import io.kestra.core.models.executions.statistics.*;
@@ -20,14 +23,15 @@ import io.kestra.core.utils.ListUtils;
 import io.kestra.core.utils.NamespaceUtils;
 import io.kestra.jdbc.runner.AbstractJdbcExecutorStateStorage;
 import io.kestra.jdbc.runner.JdbcQueueIndexerInterface;
+import io.kestra.jdbc.services.JdbcFilterService;
 import io.kestra.plugin.core.dashboard.data.Executions;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.event.ApplicationEventPublisher;
 import io.micronaut.data.model.Pageable;
 import io.micronaut.inject.qualifiers.Qualifiers;
 import jakarta.annotation.Nullable;
+import lombok.Getter;
 import lombok.SneakyThrows;
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jooq.Record;
 import org.jooq.*;
@@ -35,7 +39,6 @@ import org.jooq.impl.DSL;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -61,11 +64,27 @@ public abstract class AbstractJdbcExecutionRepository extends AbstractJdbcReposi
     private QueueInterface<Execution> executionQueue;
     private NamespaceUtils namespaceUtils;
 
+    private final JdbcFilterService filterService;
+
+    @Getter
+    private final Map<Executions.Fields, String> fieldsMapping = Map.of(
+        Executions.Fields.ID, "key",
+        Executions.Fields.NAMESPACE, "namespace",
+        Executions.Fields.FLOW_ID, "flow_id",
+        Executions.Fields.STATE, "state_current",
+        Executions.Fields.DURATION, "state_duration",
+        Executions.Fields.LABELS, "labels",
+        Executions.Fields.START_DATE, "start_date",
+        Executions.Fields.END_DATE, "end_date",
+        Executions.Fields.TRIGGER_EXECUTION_ID, "trigger_execution_id"
+    );
+
     @SuppressWarnings("unchecked")
     public AbstractJdbcExecutionRepository(
         io.kestra.jdbc.AbstractJdbcRepository<Execution> jdbcRepository,
         ApplicationContext applicationContext,
-        AbstractJdbcExecutorStateStorage executorStateStorage
+        AbstractJdbcExecutorStateStorage executorStateStorage,
+        JdbcFilterService filterService
     ) {
         this.jdbcRepository = jdbcRepository;
         this.executorStateStorage = executorStateStorage;
@@ -74,6 +93,8 @@ public abstract class AbstractJdbcExecutionRepository extends AbstractJdbcReposi
 
         // we inject ApplicationContext in order to get the ExecutionQueue lazy to avoid StackOverflowError
         this.applicationContext = applicationContext;
+
+        this.filterService = filterService;
     }
 
     @SuppressWarnings("unchecked")
@@ -117,6 +138,7 @@ public abstract class AbstractJdbcExecutionRepository extends AbstractJdbcReposi
             FluxSink.OverflowStrategy.BUFFER
         );
     }
+
     /**
      * {@inheritDoc}
      **/
@@ -1088,7 +1110,111 @@ public abstract class AbstractJdbcExecutionRepository extends AbstractJdbcReposi
     }
 
     @Override
-    public ArrayListTotal<Map<String, Object>> fetchData(String tenantId, DataFilter<Executions.Fields, ? extends ColumnDescriptor<Executions.Fields>> filter, ZonedDateTime startDate, ZonedDateTime endDate, Pageable pageable) throws IOException {
-        throw new NotImplementedException();
+    public ArrayListTotal<Map<String, Object>> fetchData(
+        String tenantId,
+        DataFilter<Executions.Fields, ? extends ColumnDescriptor<Executions.Fields>> descriptors,
+        ZonedDateTime startDate,
+        ZonedDateTime endDate,
+        Pageable pageable
+    ) {
+        return this.jdbcRepository
+            .getDslContextWrapper()
+            .transactionResult(configuration -> {
+                DSLContext context = DSL.using(configuration);
+                // Init request
+                SelectConditionStep<Record> selectConditionStep = select(
+                    context,
+                    filterService,
+                    descriptors,
+                    this.getFieldsMapping(),
+                    this.jdbcRepository.getTable(),
+                    tenantId
+                );
+
+                // Apply Where filter
+                selectConditionStep = where(selectConditionStep, filterService, descriptors, fieldsMapping);
+
+                // Apply GroupBy for aggregation
+                SelectHavingStep<Record> selectHavingStep = groupBy(selectConditionStep, descriptors, fieldsMapping);
+
+                // Apply OrderBy
+                SelectSeekStepN<Record> selectSeekStep = orderBy(selectHavingStep, descriptors);
+
+                // Fetch and paginate if provided
+                List<Map<String, Object>> results = fetchSeekStep(selectSeekStep, pageable);
+
+                // Fetch total count for pagination
+                int total = context.fetchCount(selectConditionStep);
+
+                return new ArrayListTotal<>(results, total);
+            });
+    }
+
+    @Override
+    protected <F extends Enum<F>> Field<?> columnToField(ColumnDescriptor<?> column, Map<F, String> fieldsMapping) {
+        if (column.getField() == null) {
+            return null;
+        }
+        Field<?> field = field(fieldsMapping.get(column.getField()));
+        if (field.getName().equals(STATE_CURRENT_FIELD.getName())) {
+            return STATE_CURRENT_FIELD;
+        } else if (field.getName().equals(NAMESPACE_FIELD.getName())) {
+            return NAMESPACE_FIELD;
+        } else if (field.getName().equals(START_DATE_FIELD.getName())) {
+            return START_DATE_FIELD;
+        } else if (field.getName().equals(fieldsMapping.get(Executions.Fields.DURATION))) {
+            return DSL.field("{0} / 1000", Long.class, field);
+        }
+        return field;
+    }
+
+    @Override
+    protected <F extends Enum<F>> SelectConditionStep<Record> where(SelectConditionStep<Record> selectConditionStep, JdbcFilterService jdbcFilterService, DataFilter<F, ? extends ColumnDescriptor<F>> descriptors, Map<F, String> fieldsMapping) {
+        if (!ListUtils.isEmpty(descriptors.getWhere())) {
+            // Check if descriptors contain a filter of type Executions.Fields.STATE and apply the custom filter "statesFilter" if present
+            List<In<Executions.Fields>> stateFilters = descriptors.getWhere().stream()
+                .filter(descriptor -> descriptor.getField().equals(Executions.Fields.STATE) && descriptor instanceof In)
+                .map(descriptor -> (In<Executions.Fields>) descriptor)
+                .toList();
+
+            if (!stateFilters.isEmpty()) {
+                selectConditionStep = selectConditionStep.and(
+                    statesFilter(stateFilters.stream()
+                        .flatMap(stateFilter -> stateFilter.getValues().stream())
+                        .map(value -> State.Type.valueOf(value.toString()))
+                        .toList())
+                );
+            }
+
+            // Check if descriptors contain a filter of type EXECUTIONS.Fields.LABELS and apply the findCondition() method if present
+            List<Contains<Executions.Fields>> labelFilters = descriptors.getWhere().stream()
+                .filter(descriptor -> descriptor.getField().equals(Executions.Fields.LABELS) && descriptor instanceof Contains<F>)
+                .map(descriptor -> (Contains<Executions.Fields>) descriptor)
+                .toList();
+
+            if (!labelFilters.isEmpty()) {
+                Map<String, String> mergedMap = new HashMap<>();
+
+                labelFilters.forEach(labelFilter -> {
+                    Map<String, String> currentMap = (Map<String, String>) labelFilter.getValue();
+                    mergedMap.putAll(currentMap);
+                });
+
+                selectConditionStep = selectConditionStep.and(findCondition(null, mergedMap));
+            }
+
+            // Remove the state filters from descriptors
+            List<AbstractFilter<F>> remainingFilters = descriptors.getWhere().stream()
+                .filter(descriptor -> !descriptor.getField().equals(Executions.Fields.STATE) || !(descriptor instanceof In)) // Filter state
+                .filter(descriptor -> !descriptor.getField().equals(Executions.Fields.LABELS) || !(descriptor instanceof Contains<F>)) // Filter labels
+                .toList();
+
+
+
+            // Use the generic method addFilters with the remaining filters
+            return filterService.addFilters(selectConditionStep, fieldsMapping, remainingFilters);
+        } else {
+            return selectConditionStep;
+        }
     }
 }

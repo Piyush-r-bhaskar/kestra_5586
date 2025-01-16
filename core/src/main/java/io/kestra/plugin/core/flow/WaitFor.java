@@ -1,5 +1,6 @@
 package io.kestra.plugin.core.flow;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
@@ -74,6 +75,15 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
     protected List<Task> errors;
 
     @Valid
+    @JsonProperty("finally")
+    @Getter(AccessLevel.NONE)
+    protected List<Task> _finally;
+
+    public List<Task> getFinally() {
+        return this._finally;
+    }
+
+    @Valid
     @PluginProperty
     @NotNull
     private List<Task> tasks;
@@ -108,6 +118,7 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
             subGraph,
             tasks,
             this.errors,
+            this._finally,
             taskRun,
             execution
         );
@@ -120,7 +131,10 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
         return Stream
             .concat(
                 tasks.stream(),
-                this.getErrors() != null ? this.getErrors().stream() : Stream.empty()
+                Stream.concat(
+                    this.getErrors() != null ? this.getErrors().stream() : Stream.empty(),
+                    this.getFinally() != null ? this.getFinally().stream() : Stream.empty()
+                )
             )
             .toList();
     }
@@ -137,6 +151,7 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
             execution,
             this.childTasks(runContext, parentTaskRun),
             FlowableUtils.resolveTasks(this.getErrors(), parentTaskRun),
+            FlowableUtils.resolveTasks(this.getFinally(), parentTaskRun),
             parentTaskRun
         );
     }
@@ -193,6 +208,7 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
             execution,
             this.childTasks(runContext, parentTaskRun),
             FlowableUtils.resolveTasks(this.getErrors(), parentTaskRun),
+            FlowableUtils.resolveTasks(this.getFinally(), parentTaskRun),
             parentTaskRun,
             runContext,
             isAllowFailure(),
@@ -209,7 +225,7 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
             .stream()
             .filter(t -> t.getParentTaskRunId() != null
                 && t.getParentTaskRunId().equals(parentTaskRun.getId())
-                && t.getState().isSuccess()
+                && t.getState().isTerminatedNoFail()
             ).count() == tasks.size();
 
     }

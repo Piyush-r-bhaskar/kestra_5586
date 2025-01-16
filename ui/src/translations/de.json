@@ -677,7 +677,8 @@
             "log_level": "Standard-Log-Ebene",
             "log_display": "Standard-Log-Anzeige",
             "execute_flow": "Flow ausführen",
-            "execute_default_tab": "Standard-Ausführungs-Registerkarte"
+            "execute_default_tab": "Standard-Ausführungs-Registerkarte",
+            "editor_type": "Standard-Editor-Typ"
           }
         },
         "theme": {
@@ -872,14 +873,17 @@
       "not_auth": "Sie haben nicht die erforderlichen Berechtigungen, um dieses Widget anzuzeigen.",
       "see_all": "Alle anzeigen",
       "success_ratio_tooltip": "Erfolgsquote ist die Summe der SUCCESS, CANCELLED und WARNING Ausführungen, geteilt durch die Gesamtanzahl der Ausführungen in einem beendeten Zustand.",
-      "failure_ratio_tooltip": "Der Fehlerrate ist die Summe der FAILED, KILLED und RETRIED Ausführungen, geteilt durch die Gesamtanzahl der Ausführungen in einem beendeten Zustand."
+      "failure_ratio_tooltip": "Der Fehlerrate ist die Summe der FAILED, KILLED und RETRIED Ausführungen, geteilt durch die Gesamtanzahl der Ausführungen in einem beendeten Zustand.",
+      "preview": "Dashboard-Vorschau"
     },
     "delete_log": "Sind Sie sicher, dass Sie das Log löschen möchten?",
     "docs": "Dokumentation",
     "behavior": "Verhalten",
     "concurrency-view": {
       "desc_no_limit": "Lesen Sie mehr über <strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">Nebenläufigkeitsgrenzen</a></strong> in unserer Dokumentation.",
-      "title_no_limit": "Es sind keine Grenzen für diesen Flow festgelegt."
+      "title_no_limit": "Es sind keine Grenzen für diesen Flow festgelegt.",
+      "desc_no_executions": "Lesen Sie mehr über <strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Ausführungen</a></strong> in unserer Dokumentation.",
+      "title_no_executions": "Keine laufenden Ausführungen für diesen Flow."
     },
     "active-slots": "Aktive Slots",
     "concurrency": "Nebenläufigkeit",
@@ -1036,6 +1040,53 @@
       "format": "Geben Sie den Parameter als 'key:value' ein",
       "label": "Filter auswählen"
     },
-    "custom value": "Benutzerdefinierter Wert"
+    "custom value": "Benutzerdefinierter Wert",
+    "execution restarted": "Diese Ausführung wurde {nbRestart} Mal neu gestartet.",
+    "chart": "Diagramm",
+    "source only": "Nur Quelle",
+    "chart preview": "Diagrammvorschau",
+    "execution replayed": "Diese Ausführung wurde erneut abgespielt.",
+    "execution replay": "Diese Ausführung ist eine Wiederholung von <code>{originalId}</code>.",
+    "no_code": {
+      "fields": {
+        "main": {
+          "description": "Beschreibung",
+          "namespace": "Namespace",
+          "flow_id": "Flow-ID"
+        },
+        "general": {
+          "plugin_defaults": "Plugin-Standardeinstellungen",
+          "variables": "Variablen",
+          "labels": "Labels",
+          "outputs": "Ausgaben",
+          "concurrency": "Nebenläufigkeit",
+          "inputs": "Eingaben",
+          "retry": "Wiederholen",
+          "disabled": "Deaktiviert"
+        }
+      },
+      "sections": {
+        "general": "Allgemeine Eigenschaften",
+        "triggers": "Trigger",
+        "main": "Haupteigenschaften",
+        "error_handlers": "Fehlerbehandler",
+        "tasks": "Aufgaben"
+      },
+      "creation": {
+        "select": "Wählen Sie einen {section} aus",
+        "tasks": "Aufgabe hinzufügen",
+        "error handlers": "Fügen Sie einen Fehlerhandler hinzu",
+        "triggers": "Füge einen Trigger hinzu"
+      },
+      "save": {
+        "tasks": "Aufgabe speichern",
+        "triggers": "Speicher Trigger"
+      },
+      "labels": {
+        "no_code": "Kein Code-Editor",
+        "yaml": "YAML-Editor"
+      },
+      "adding": "+ {what} hinzufügen"
+    }
   }
 }

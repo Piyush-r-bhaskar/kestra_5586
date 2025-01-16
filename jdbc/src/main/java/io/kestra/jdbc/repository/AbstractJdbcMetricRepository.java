@@ -10,14 +10,15 @@ import io.kestra.core.repositories.ArrayListTotal;
 import io.kestra.core.repositories.MetricRepositoryInterface;
 import io.kestra.core.utils.DateUtils;
 import io.kestra.core.utils.ListUtils;
+import io.kestra.jdbc.services.JdbcFilterService;
 import io.kestra.plugin.core.dashboard.data.Metrics;
 import io.micrometer.common.lang.Nullable;
 import io.micronaut.data.model.Pageable;
-import org.apache.commons.lang3.NotImplementedException;
+import lombok.Getter;
+import org.jooq.Record;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,9 +32,27 @@ import java.util.function.Function;
 public abstract class AbstractJdbcMetricRepository extends AbstractJdbcRepository implements MetricRepositoryInterface {
     protected io.kestra.jdbc.AbstractJdbcRepository<MetricEntry> jdbcRepository;
 
-    public AbstractJdbcMetricRepository(io.kestra.jdbc.AbstractJdbcRepository<MetricEntry> jdbcRepository) {
+    public AbstractJdbcMetricRepository(io.kestra.jdbc.AbstractJdbcRepository<MetricEntry> jdbcRepository,
+                                        JdbcFilterService filterService) {
         this.jdbcRepository = jdbcRepository;
+
+        this.filterService = filterService;
     }
+
+    @Getter
+    private final JdbcFilterService filterService;
+
+    @Getter
+    private final Map<Metrics.Fields, String> fieldsMapping = Map.of(
+        Metrics.Fields.NAMESPACE, "namespace",
+        Metrics.Fields.FLOW_ID, "flow_id",
+        Metrics.Fields.TASK_ID, "task_id",
+        Metrics.Fields.EXECUTION_ID, "execution_d",
+        Metrics.Fields.TASK_RUN_ID, "taskrun_id",
+        Metrics.Fields.NAME, "metric_name",
+        Metrics.Fields.VALUE, "metric_value",
+        Metrics.Fields.DATE, "timestamp"
+    );
 
     @Override
     public ArrayListTotal<MetricEntry> findByExecutionId(String tenantId, String executionId, Pageable pageable) {
@@ -317,7 +336,44 @@ public abstract class AbstractJdbcMetricRepository extends AbstractJdbcRepositor
     }
 
     @Override
-    public ArrayListTotal<Map<String, Object>> fetchData(String tenantId, DataFilter<Metrics.Fields, ? extends ColumnDescriptor<Metrics.Fields>> filter, ZonedDateTime startDate, ZonedDateTime endDate, Pageable pageable) throws IOException {
-        throw new NotImplementedException();
+    public ArrayListTotal<Map<String, Object>> fetchData(
+        String tenantId,
+        DataFilter<Metrics.Fields, ? extends ColumnDescriptor<Metrics.Fields>> descriptors,
+        ZonedDateTime startDate,
+        ZonedDateTime endDate,
+        Pageable pageable
+    ) {
+        return this.jdbcRepository
+            .getDslContextWrapper()
+            .transactionResult(configuration -> {
+                DSLContext context = DSL.using(configuration);
+                // Init request
+                SelectConditionStep<Record> selectConditionStep = select(
+                    context,
+                    this.getFilterService(),
+                    descriptors,
+                    this.getFieldsMapping(),
+                    this.jdbcRepository.getTable(),
+                    tenantId
+                );
+
+                // Apply Where filter
+                selectConditionStep = where(selectConditionStep, this.getFilterService(), descriptors, fieldsMapping);
+
+                // Apply GroupBy for aggregation
+                SelectHavingStep<Record> selectHavingStep = groupBy(selectConditionStep, descriptors, fieldsMapping);
+
+                // Apply OrderBy
+                SelectSeekStepN<Record> selectSeekStep = orderBy(selectHavingStep, descriptors);
+
+                // Fetch and paginate if provided
+                List<Map<String, Object>> results = fetchSeekStep(selectSeekStep, pageable);
+
+
+                // Fetch total count for pagination
+                int total = context.fetchCount(selectConditionStep);
+
+                return new ArrayListTotal<>(results, total);
+            });
     }
 }

@@ -5,10 +5,10 @@ import io.kestra.core.models.flows.Flow;
 import io.kestra.core.models.flows.FlowWithSource;
 import io.kestra.core.models.flows.Type;
 import io.kestra.core.models.flows.input.StringInput;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.repositories.FlowRepositoryInterface;
 import io.kestra.plugin.core.debug.Echo;
 import io.kestra.plugin.core.debug.Return;
-import io.kestra.plugin.core.log.Log;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +42,7 @@ class FlowServiceTest {
             .tasks(Collections.singletonList(Return.builder()
                 .id(taskId)
                 .type(Return.class.getName())
-                .format("test")
+                .format(Property.of("test"))
                 .build()))
             .build();
     }
@@ -270,7 +270,7 @@ class FlowServiceTest {
             .tasks(Collections.singletonList(Echo.builder()
                 .id("taskId")
                 .type(Return.class.getName())
-                .format("test")
+                .format(Property.of("test"))
                 .build()))
             .build();
 
@@ -301,7 +301,9 @@ class FlowServiceTest {
     void delete() {
         Flow flow = create("deleteTest", "test", 1);
         FlowWithSource saved = flowRepository.create(flow, flow.generateSource(), flow);
+        assertThat(flowRepository.findById(flow.getTenantId(), flow.getNamespace(), flow.getId()).isPresent(), is(true));
         flowService.delete(saved);
+        assertThat(flowRepository.findById(flow.getTenantId(), flow.getNamespace(), flow.getId()).isPresent(), is(false));
     }
 
     @Test

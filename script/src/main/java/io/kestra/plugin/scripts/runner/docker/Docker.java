@@ -9,7 +9,6 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.NameParser;
-import com.github.dockerjava.transport.DomainSocket;
 import com.sun.jna.LastErrorException;
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.models.annotations.Example;
@@ -144,7 +143,7 @@ import static io.kestra.core.utils.WindowsUtils.windowsToUnixPath;
         ),
     }
 )
-public class Docker extends TaskRunner {
+public class Docker extends TaskRunner<Docker.DockerTaskRunnerDetailResult> {
     private static final ReadableBytesTypeConverter READABLE_BYTES_TYPE_CONVERTER = new ReadableBytesTypeConverter();
     private static final Pattern NEWLINE_PATTERN = Pattern.compile("([^\\r\\n]+)[\\r\\n]+");
 
@@ -199,6 +198,16 @@ public class Docker extends TaskRunner {
     )
     @PluginProperty(dynamic = true)
     protected String networkMode;
+
+    @Schema(
+        title = "List of port bindings.",
+        description = "Corresponds to the --publish (-p) option of the docker run CLI command using the format `ip:dockerHostPort:containerPort/protocol`. Possible example : \n" +
+            "- 8080:80/udp" +
+            "- 127.0.0.1:8080:80" +
+            "- 127.0.0.1:8080:80/udp"
+    )
+    @PluginProperty(dynamic = true)
+    protected List<String> portBindings;
 
     @Schema(
         title = "List of volumes to mount.",
@@ -265,6 +274,12 @@ public class Docker extends TaskRunner {
     private String shmSize;
 
     @Schema(
+        title = "Give extended privileges to this container."
+    )
+    @PluginProperty(dynamic = true)
+    private Boolean privileged;
+
+    @Schema(
         title = "File handling strategy.",
         description = """
             How to handle local files (input files, output files, namespace files, ...).
@@ -283,6 +298,13 @@ public class Docker extends TaskRunner {
     @Builder.Default
     @PluginProperty
     private Boolean delete = true;
+
+    @Builder.Default
+    @Schema(
+        title = "Whether to wait for the container to exit."
+    )
+    @PluginProperty
+    private final Boolean wait = true;
 
     /**
      * Convenient default instance to be used as task default value for a 'taskRunner' property.
@@ -312,12 +334,12 @@ public class Docker extends TaskRunner {
             .cpu(dockerOptions.getCpu())
             .memory(dockerOptions.getMemory())
             .shmSize(dockerOptions.getShmSize())
+            .privileged(dockerOptions.getPrivileged())
             .build();
     }
 
-
     @Override
-    public RunnerResult run(RunContext runContext, TaskCommands taskCommands, List<String> filesToDownload) throws Exception {
+    public TaskRunnerResult<DockerTaskRunnerDetailResult> run(RunContext runContext, TaskCommands taskCommands, List<String> filesToDownload) throws Exception {
         if (taskCommands.getContainerImage() == null && this.image == null) {
             throw new IllegalArgumentException("This task runner needs the `containerImage` property to be set");
         }
@@ -415,6 +437,14 @@ public class Docker extends TaskRunner {
                 );
             }
 
+            if (!wait) {
+                return TaskRunnerResult.<DockerTaskRunnerDetailResult>builder()
+                    .exitCode(0)
+                    .logConsumer(defaultLogConsumer)
+                    .details(DockerTaskRunnerDetailResult.builder().containerId(exec.getId()).build())
+                    .build();
+            }
+
             // register the runnable to be used for killing the container.
             onKill(() -> kill(dockerClient, exec.getId(), logger));
 
@@ -496,7 +526,11 @@ public class Docker extends TaskRunner {
                     downloadOutputFiles(exec.getId(), dockerClient, runContext, taskCommands);
                 }
 
-                return new RunnerResult(exitCode, defaultLogConsumer);
+                return TaskRunnerResult.<DockerTaskRunnerDetailResult>builder()
+                    .exitCode(exitCode)
+                    .logConsumer(defaultLogConsumer)
+                    .details(DockerTaskRunnerDetailResult.builder().containerId(exec.getId()).build())
+                    .build();
             } finally {
                 try {
                     // kill container if it's still running, this means there was an exception and the container didn't
@@ -729,10 +763,21 @@ public class Docker extends TaskRunner {
             hostConfig.withShmSize(convertBytes(runContext.render(this.getShmSize())));
         }
 
+        if (this.getPrivileged() != null) {
+            hostConfig.withPrivileged(this.getPrivileged());
+        }
+
         if (this.getNetworkMode() != null) {
             hostConfig.withNetworkMode(runContext.render(this.getNetworkMode(), additionalVars));
         }
 
+        if (this.getPortBindings() != null) {
+            hostConfig.withPortBindings(runContext.render(this.getPortBindings(), additionalVars)
+                .stream()
+                .map(PortBinding::parse)
+                .toList()
+            );
+        }
 
         return container
             .withHostConfig(hostConfig)
@@ -786,6 +831,12 @@ public class Docker extends TaskRunner {
                 }
             );
         }
+    }
+
+    @SuperBuilder
+    @Getter
+    public static class DockerTaskRunnerDetailResult extends TaskRunnerDetailResult {
+        private String containerId;
     }
 
     public enum FileHandlingStrategy {

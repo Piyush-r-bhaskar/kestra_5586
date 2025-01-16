@@ -13,6 +13,9 @@ public record Label(@NotNull String key, @NotNull String value) {
     public static final String USERNAME = SYSTEM_PREFIX + "username";
     public static final String APP = SYSTEM_PREFIX + "app";
     public static final String READ_ONLY = SYSTEM_PREFIX + "readOnly";
+    public static final String RESTARTED = SYSTEM_PREFIX + "restarted";
+    public static final String REPLAY = SYSTEM_PREFIX + "replay";
+    public static final String REPLAYED = SYSTEM_PREFIX + "replayed";
 
     /**
      * Static helper method for converting a map to a list of labels.

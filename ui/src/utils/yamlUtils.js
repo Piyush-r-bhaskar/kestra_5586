@@ -270,6 +270,43 @@ export default class YamlUtils {
         return null;
     }
 
+    static extractAllGraphTypes(source) {
+        const yamlDoc = yaml.parseDocument(source);
+        const types = [];
+        if (yamlDoc.contents && yamlDoc.contents.items && yamlDoc.contents.items.find(e => ["charts", "data"].includes(e.key.value))) {
+            yaml.visit(yamlDoc, {
+                Map(_, map) {
+                    if (map.items) {
+                        for (const item of map.items) {
+                            if (item.key.value === "type") {
+                                const type = item.value?.value;
+                                types.push({type, range: map.range});
+                            }
+                        }
+                    }
+                }
+            })
+        }
+        return types;
+    }
+
+    static getGraphType(source, position) {
+        const types = this.extractAllGraphTypes(source)
+        const lineCounter = new LineCounter();
+        yaml.parseDocument(source, {lineCounter});
+        const cursorIndex = lineCounter.lineStarts[position.lineNumber - 1] + position.column;
+
+        for(const type of types.reverse()) {
+            if (cursorIndex > type.range[1]) {
+                return type.type;
+            }
+            if (cursorIndex >= type.range[0] && cursorIndex <= type.range[1]) {
+                return type.type;
+            }
+        }
+        return null;
+    }
+
     static swapTasks(source, taskId1, taskId2) {
         const yamlDoc = yaml.parseDocument(source);
 
@@ -636,5 +673,55 @@ export default class YamlUtils {
         }
 
         return yamlDoc.toString(TOSTRING_OPTIONS);
+    }
+
+    static getChartAtPosition(source, position) {
+        const yamlDoc = yaml.parseDocument(source);
+        const lineCounter = new LineCounter();
+        yaml.parseDocument(source, {lineCounter});
+        const cursorIndex = lineCounter.lineStarts[position.lineNumber - 1] + position.column;
+
+        let chart = null;
+        yaml.visit(yamlDoc, {
+            Map(_, map) {
+                if (map.items) {
+                    for (const item of map.items) {
+                        if (item.key.value === "charts") {
+                            if (item.value.items) {
+                                for (const chartItem of item.value.items) {
+                                    if (chartItem.range[0] <= cursorIndex && chartItem.range[1] >= cursorIndex) {
+                                        chart = chartItem;
+                                        return yaml.visit.BREAK;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return chart ? chart.toJSON() : null;
+    }
+
+    static getAllCharts(source) {
+        const yamlDoc = yaml.parseDocument(source);
+        const charts = [];
+
+        yaml.visit(yamlDoc, {
+            Map(_, map) {
+                if (map.items) {
+                    for (const item of map.items) {
+                        if (item.key.value === "charts" && item.value.items) {
+                            for (const chartItem of item.value.items) {
+                                charts.push(chartItem.toJSON());
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return charts;
     }
 }

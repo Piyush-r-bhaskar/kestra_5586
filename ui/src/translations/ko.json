@@ -677,7 +677,8 @@
             "log_level": "기본 Log 레벨",
             "log_display": "기본 Log 표시",
             "execute_flow": "Flow 실행",
-            "execute_default_tab": "기본 실행 탭"
+            "execute_default_tab": "기본 실행 탭",
+            "editor_type": "기본 편집기 유형"
           }
         },
         "theme": {
@@ -872,14 +873,17 @@
       "not_auth": "이 위젯을 볼 수 있는 권한이 없습니다.",
       "see_all": "모두 보기",
       "success_ratio_tooltip": "성공 비율은 SUCCESS, CANCELLED 및 WARNING 실행의 합계를 종료된 상태의 총 실행 수로 나눈 값입니다.",
-      "failure_ratio_tooltip": "실패 비율은 FAILED, KILLED, RETRIED 실행의 합을 종료된 상태의 전체 실행 수로 나눈 값입니다."
+      "failure_ratio_tooltip": "실패 비율은 FAILED, KILLED, RETRIED 실행의 합을 종료된 상태의 전체 실행 수로 나눈 값입니다.",
+      "preview": "대시보드 미리보기"
     },
     "delete_log": "로그를 삭제하시겠습니까?",
     "docs": "문서",
     "behavior": "동작",
     "concurrency-view": {
       "desc_no_limit": "우리 문서에서 <strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">Concurrency Limits</a></strong>에 대해 더 읽어보세요.",
-      "title_no_limit": "이 Flow에 대한 제한이 설정되지 않았습니다."
+      "title_no_limit": "이 Flow에 대한 제한이 설정되지 않았습니다.",
+      "desc_no_executions": "<strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Executions</a></strong>에 대한 자세한 내용은 문서를 참조하세요.",
+      "title_no_executions": "이 Flow에 대한 진행 중인 Execution이 없습니다."
     },
     "active-slots": "활성 슬롯",
     "concurrency": "동시성",
@@ -1036,6 +1040,53 @@
       "format": "'key:value'로 매개변수 입력",
       "label": "필터 선택"
     },
-    "custom value": "사용자 정의 value"
+    "custom value": "사용자 정의 value",
+    "execution restarted": "이 실행은 {nbRestart}번 다시 시작되었습니다.",
+    "chart": "차트",
+    "source only": "소스 전용",
+    "chart preview": "차트 미리보기",
+    "execution replayed": "이 실행은 재실행되었습니다.",
+    "execution replay": "이 실행은 <code>{originalId}</code>의 재실행입니다.",
+    "no_code": {
+      "fields": {
+        "main": {
+          "description": "설명",
+          "namespace": "네임스페이스",
+          "flow_id": "플로우 ID"
+        },
+        "general": {
+          "plugin_defaults": "플러그인 기본값",
+          "variables": "변수",
+          "labels": "레이블",
+          "outputs": "출력",
+          "concurrency": "병행성",
+          "inputs": "입력",
+          "retry": "재시도",
+          "disabled": "비활성화됨"
+        }
+      },
+      "sections": {
+        "general": "일반 속성",
+        "triggers": "트리거",
+        "main": "주요 속성",
+        "error_handlers": "오류 처리기",
+        "tasks": "작업"
+      },
+      "creation": {
+        "select": "{section}을 선택하십시오",
+        "tasks": "작업 추가",
+        "error handlers": "오류 처리기 추가",
+        "triggers": "트리거 추가"
+      },
+      "save": {
+        "tasks": "작업 저장",
+        "triggers": "트리거 저장"
+      },
+      "labels": {
+        "no_code": "코드 없는 편집기",
+        "yaml": "YAML 편집기"
+      },
+      "adding": "+ {what} 추가"
+    }
   }
 }

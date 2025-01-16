@@ -161,7 +161,7 @@
                     )
                 ) {
                     tabs.push({
-                        name: "editor",
+                        name: "edit",
                         component: FlowEditor,
                         title: this.$t("edit"),
                         containerClass: "full-container",
@@ -341,9 +341,9 @@
 </script>
 <style lang="scss" scoped>
 .gray-700 {
-    color: var(--bs-secondary-color);
+    color: var(--ks-content-secondary-color);
 }
 .body-color {
-    color: var(--bs-body-color);
+    color: var(--ks-content-primary);
 }
 </style>

@@ -89,6 +89,8 @@
         };
     });
 
+    const MAX_LABEL_LENGTH = 15;
+
     const options = computed(() =>
         defaultConfig({
             barThickness: 25,
@@ -123,6 +125,13 @@
                     position: "bottom",
                     display: true,
                     stacked: true,
+           
+                    ticks: {
+                        callback: function(value) {
+                            const namespaceName = this.getLabelForValue(value)
+                            return namespaceName.length > MAX_LABEL_LENGTH ? `${namespaceName.substring(0, MAX_LABEL_LENGTH)}...` : namespaceName;
+                        },
+                    }
                 },
                 y: {
                     title: {

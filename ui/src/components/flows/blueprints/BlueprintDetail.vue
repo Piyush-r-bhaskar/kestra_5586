@@ -171,7 +171,7 @@
         },
         computed: {
             ...mapState("auth", ["user"]),
-            ...mapState("plugin", ["icons"]),         
+            ...mapState("plugin", ["icons"]),
             userCanCreateFlow() {
                 return this.user.hasAnyAction(permission.FLOW, action.CREATE);
             },
@@ -188,7 +188,7 @@
     };
 </script>
 <style scoped lang="scss">
-    @import "@kestra-io/ui-libs/src/scss/variables.scss";
+    @import "@kestra-io/ui-libs/src/scss/variables";
 
     .header-wrapper {
         margin-bottom: calc($spacer * 2);
@@ -198,7 +198,7 @@
         }
 
         .header {
-            margin-bottom: calc(var(--spacer) * 0.5);
+            margin-bottom: .5rem;
 
             > * {
                 margin: 0;
@@ -250,7 +250,7 @@
             display: flex;
             flex-wrap: wrap;
             > div {
-                background: var(--card-bg);
+                background: var(--ks-background-card);
                 border-radius: var(--bs-border-radius);
                 min-width : 100px;
                 width: 100px;
@@ -260,7 +260,7 @@
                 margin-bottom: $spacer;
                 display: flex;
                 flex-wrap: wrap;
-                border: 1px solid var(--bs-border-color);
+                border: 1px solid var(--ks-border-primary);
 
                 :deep(.wrapper) {
                     .icon {
@@ -279,18 +279,18 @@
             }
         }
     }
-    
+
         .tags {
             margin: 10px 0;
             display: flex;
-                        
+
             .el-tag.el-tag--info {
-                background-color: var(--card-bg);
+                background-color: var(--ks-background-card);
                 padding: 15px 10px;
-                color: var(--el-text-color-regular);
+                color: var(--ks-content-primary);
                 text-transform: capitalize;
                 font-size: var(--el-font-size-small);
-                border: 1px solid var(--bs-border-color);
+                border: 1px solid var(--ks-border-primary);
             }
 
             .tag-box {

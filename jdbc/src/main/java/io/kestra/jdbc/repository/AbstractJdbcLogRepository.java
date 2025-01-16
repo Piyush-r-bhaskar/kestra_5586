@@ -9,16 +9,17 @@ import io.kestra.core.repositories.ArrayListTotal;
 import io.kestra.core.repositories.LogRepositoryInterface;
 import io.kestra.core.utils.DateUtils;
 import io.kestra.core.utils.ListUtils;
+import io.kestra.jdbc.services.JdbcFilterService;
 import io.kestra.plugin.core.dashboard.data.Logs;
 import io.micronaut.data.model.Pageable;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.NotImplementedException;
+import java.util.stream.Stream;
+import lombok.Getter;
 import org.jooq.Record;
 import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.slf4j.event.Level;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,15 +29,40 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.*;
 import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 public abstract class AbstractJdbcLogRepository extends AbstractJdbcRepository implements LogRepositoryInterface {
+
+    protected static final int FETCH_SIZE = 100;
+
     protected io.kestra.jdbc.AbstractJdbcRepository<LogEntry> jdbcRepository;
 
-    public AbstractJdbcLogRepository(io.kestra.jdbc.AbstractJdbcRepository<LogEntry> jdbcRepository) {
+    public AbstractJdbcLogRepository(io.kestra.jdbc.AbstractJdbcRepository<LogEntry> jdbcRepository,
+                                     JdbcFilterService filterService) {
         this.jdbcRepository = jdbcRepository;
+
+        this.filterService = filterService;
     }
 
     abstract protected Condition findCondition(String query);
+
+    @Getter
+    private final JdbcFilterService filterService;
+
+    @Getter
+    private final Map<Logs.Fields, String> fieldsMapping = Map.of(
+        Logs.Fields.DATE, "timestamp",
+        Logs.Fields.NAMESPACE, "namespace",
+        Logs.Fields.FLOW_ID, "flow_id",
+        Logs.Fields.TASK_ID, "task_id",
+        Logs.Fields.EXECUTION_ID, "execution_id",
+        Logs.Fields.TASK_RUN_ID, "taskrun_id",
+        Logs.Fields.ATTEMPT_NUMBER, "attempt_number",
+        Logs.Fields.TRIGGER_ID, "trigger_id",
+        Logs.Fields.LEVEL, "level",
+        Logs.Fields.MESSAGE, "message"
+    );
 
     @Override
     public ArrayListTotal<LogEntry> find(
@@ -77,9 +103,7 @@ public abstract class AbstractJdbcLogRepository extends AbstractJdbcRepository i
         @Nullable ZonedDateTime startDate,
         @Nullable ZonedDateTime endDate
     ) {
-        if (namespace != null) {
-            select = select.and(DSL.or(field("namespace").eq(namespace), field("namespace").likeIgnoreCase(namespace + ".%")));
-        }
+        select = addNamespace(select, namespace);
 
         if (flowId != null) {
             select = select.and(field("flow_id").eq(flowId));
@@ -89,9 +113,7 @@ public abstract class AbstractJdbcLogRepository extends AbstractJdbcRepository i
             select = select.and(field("trigger_id").eq(triggerId));
         }
 
-        if (minLevel != null) {
-            select = select.and(minLevel(minLevel));
-        }
+        select = addMinLevel(select, minLevel);
 
         if (query != null) {
             select = select.and(this.findCondition(query));
@@ -106,6 +128,54 @@ public abstract class AbstractJdbcLogRepository extends AbstractJdbcRepository i
         }
 
         return select;
+    }
+
+    private <T extends Record> SelectConditionStep<T> addMinLevel(SelectConditionStep<T> select,
+        Level minLevel) {
+        if (minLevel != null) {
+            select = select.and(minLevel(minLevel));
+        }
+        return select;
+    }
+
+    private static <T extends Record> SelectConditionStep<T> addNamespace(SelectConditionStep<T> select,
+        String namespace) {
+        if (namespace != null) {
+            select = select.and(DSL.or(field("namespace").eq(namespace), field("namespace").likeIgnoreCase(namespace + ".%")));
+        }
+        return select;
+    }
+
+    @Override
+    public Flux<LogEntry> findAsync(
+        @Nullable String tenantId,
+        @Nullable String namespace,
+        @Nullable Level minLevel,
+        ZonedDateTime startDate
+    ){
+        return Flux.create(emitter -> this.jdbcRepository
+            .getDslContextWrapper()
+            .transaction(configuration -> {
+                DSLContext context = DSL.using(configuration);
+
+                SelectConditionStep<Record1<Object>> select = context
+                    .select(field("value"))
+                    .hint(context.configuration().dialect().supports(SQLDialect.MYSQL) ? "SQL_CALC_FOUND_ROWS" : null)
+                    .from(this.jdbcRepository.getTable())
+                    .where(this.defaultFilter(tenantId));
+                addNamespace(select, namespace);
+                addMinLevel(select, minLevel);
+                select = select.and(field("timestamp").greaterThan(startDate.toOffsetDateTime()));
+
+                Select<Record1<Object>> query = this.jdbcRepository.buildPageQuery(context, select);
+
+                try (Stream<Record1<Object>> stream = query.fetchSize(FETCH_SIZE).stream()){
+                    stream.map((Record record) -> jdbcRepository.map(record))
+                        .forEach(emitter::next);
+                } finally {
+                    emitter.complete();
+                }
+            }), FluxSink.OverflowStrategy.BUFFER);
     }
 
     @Override
@@ -555,7 +625,44 @@ public abstract class AbstractJdbcLogRepository extends AbstractJdbcRepository i
     }
 
     @Override
-    public ArrayListTotal<Map<String, Object>> fetchData(String tenantId, DataFilter<Logs.Fields, ? extends ColumnDescriptor<Logs.Fields>> filter, ZonedDateTime startDate, ZonedDateTime endDate, Pageable pageable) throws IOException {
-        throw new NotImplementedException();
+    public ArrayListTotal<Map<String, Object>> fetchData(
+        String tenantId,
+        DataFilter<Logs.Fields, ? extends ColumnDescriptor<Logs.Fields>> descriptors,
+        ZonedDateTime startDate,
+        ZonedDateTime endDate,
+        Pageable pageable
+    ) {
+        return this.jdbcRepository
+            .getDslContextWrapper()
+            .transactionResult(configuration -> {
+                DSLContext context = DSL.using(configuration);
+                // Init request
+                SelectConditionStep<Record> selectConditionStep = select(
+                    context,
+                    this.getFilterService(),
+                    descriptors,
+                    this.getFieldsMapping(),
+                    this.jdbcRepository.getTable(),
+                    tenantId
+                );
+
+                // Apply Where filter
+                selectConditionStep = where(selectConditionStep, this.getFilterService(), descriptors, fieldsMapping);
+
+                // Apply GroupBy for aggregation
+                SelectHavingStep<Record> selectHavingStep = groupBy(selectConditionStep, descriptors, fieldsMapping);
+
+                // Apply OrderBy
+                SelectSeekStepN<Record> selectSeekStep = orderBy(selectHavingStep, descriptors);
+
+                // Fetch and paginate if provided
+                List<Map<String, Object>> results = fetchSeekStep(selectSeekStep, pageable);
+
+
+                // Fetch total count for pagination
+                int total = context.fetchCount(selectConditionStep);
+
+                return new ArrayListTotal<>(results, total);
+            });
     }
 }

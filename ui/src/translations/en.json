@@ -126,6 +126,7 @@
       "demo": "Get a demo"
     },
     "source": "Source",
+    "source only": "Source only",
     "home": "Home",
     "create": "Create",
     "create_flow": "Create Flow",
@@ -744,6 +745,7 @@
             "default_namespace": "Default Namespace",
             "log_level": "Default Log Level",
             "log_display": "Default Log Display",
+            "editor_type": "Default Editor Type",
             "execute_flow": "Execute the Flow",
             "execute_default_tab": "Default Execution Tab"
           }
@@ -934,18 +936,19 @@
       "trigger_disabled": "This trigger can only be enabled through code.",
       "description": "Description",
       "no_flow_description": "This flow has no description.",
-      "not_auth": "You don't have the necessary permissions to view this widget."
+      "not_auth": "You don't have the necessary permissions to view this widget.",
+      "preview": "Dashboard preview"
     },
     "docs": "Docs",
     "active-slots": "Active slots",
     "behavior": "Behavior",
     "concurrency": "Concurrency",
     "no-executions-view": {
-        "title": "Start automating with ",
-        "sub_title": "Click on the Execute button to start your first workflow execution.",
-        "guidance_desc": "Need guidance to execute your flow?",
-        "guidance_sub_desc": "Follow the documentation for all the info you need."
-    },    
+      "title": "Start automating with ",
+      "sub_title": "Click on the Execute button to start your first workflow execution.",
+      "guidance_desc": "Need guidance to execute your flow?",
+      "guidance_sub_desc": "Follow the documentation for all the info you need."
+    },
     "execution_guide": {
       "get_started": {
         "title": "Get Started ⚡",
@@ -961,6 +964,8 @@
       }
     },
     "concurrency-view": {
+      "title_no_executions":"No ongoing Executions for this Flow.",
+      "desc_no_executions":"Read more about <strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Executions</a></strong> in our documentation.",
       "title_no_limit": "No limits are set for this Flow.",
       "desc_no_limit": "Read more about <strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">Concurrency Limits</a></strong> in our documentation."
     },
@@ -988,6 +993,9 @@
     "cron": "Cron",
     "execution failed header": "Execution failed!",
     "execution failed message": "With last error: <code>{message}</code>",
+    "execution restarted": "This execution has been restarted {nbRestart} time(s).",
+    "execution replay": "This execution is a replay of <code>{originalId}</code>.",
+    "execution replayed": "This execution has been replayed.",
     "task run id": "TaskRun ID",
     "active": "Active",
     "flows imported": "Flows imported",
@@ -1052,6 +1060,49 @@
         "show_chart": "Show main chart"
       }
     },
-    "custom value": "Custom value"
+    "custom value": "Custom value",
+    "chart": "Chart",
+    "chart preview": "Chart preview",
+    "no_code": {
+      "adding": "+ Add a {what}",
+      "labels": {
+        "yaml": "YAML Editor",
+        "no_code": "No Code Editor"
+      },
+      "sections": {
+        "main": "Main properties",
+        "general": "General properties",
+        "tasks": "Tasks",
+        "triggers": "Triggers",
+        "error_handlers": "Error Handlers"
+      },
+      "fields": {
+        "main": {
+          "flow_id": "Flow ID",
+          "namespace": "Namespace",
+          "description": "Description"
+        },
+        "general": {
+          "retry": "Retry",
+          "labels": "Labels",
+          "inputs": "Inputs",
+          "outputs": "Outputs",
+          "variables": "Variables",
+          "concurrency": "Concurrency",
+          "plugin_defaults": "Plugin Defaults",
+          "disabled": "Disabled"
+        }
+      },
+      "creation": {
+        "tasks": "Add a task",
+        "triggers": "Add a trigger",
+        "error handlers": "Add an error handler",
+        "select": "Select a {section}"
+      },
+      "save": {
+        "tasks": "Save task",
+        "triggers": "Save trigger"
+      }
+    }
   }
 }

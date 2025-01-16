@@ -146,7 +146,7 @@
 
     import {pageFromRoute} from "../../utils/eventsRouter";
 
-    import TaskIcon from "@kestra-io/ui-libs/src/components/misc/TaskIcon.vue";
+    import {TaskIcon} from "@kestra-io/ui-libs";
     import Animation from "../../assets/onboarding/animation.gif";
 
     import LightningBolt from "../../assets/onboarding/icons/lightning-bolt.svg";
@@ -299,7 +299,7 @@
                     params: {
                         namespace: "tutorial",
                         id: flows.value[activeFlow.value]?.id,
-                        tab: "editor",
+                        tab: "edit",
                     },
                 });
                 store.commit("core/setGuidedProperties", {

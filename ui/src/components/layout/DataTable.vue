@@ -62,7 +62,7 @@
     :deep(.el-table) {
         td {
             .el-tag {
-                margin-right: calc(var(--spacer) / 3);
+                margin-right: .3rem;
             }
         }
     }

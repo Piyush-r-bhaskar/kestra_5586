@@ -180,7 +180,7 @@ class DocumentationGeneratorTest {
         RegisteredPlugin scan = pluginScanner.scan();
         Class<Process> processTaskRunner = scan.findClass(Process.class.getName()).orElseThrow();
 
-        ClassPluginDocumentation<? extends TaskRunner> doc = ClassPluginDocumentation.of(jsonSchemaGenerator, scan, processTaskRunner, TaskRunner.class);
+        ClassPluginDocumentation<Process> doc = ClassPluginDocumentation.of(jsonSchemaGenerator, scan, processTaskRunner, Process.class);
 
         String render = DocumentationGenerator.render(doc);
 

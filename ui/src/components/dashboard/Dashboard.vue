@@ -16,7 +16,7 @@
             :prefix="custom.shown ? 'custom_dashboard' : 'dashboard'"
             :include="
                 custom.shown
-                    ? ['relative_date', 'absolute_date']
+                    ? ['relative_date', 'absolute_date', 'namespace', 'labels']
                     : [
                         'namespace',
                         'state',
@@ -44,7 +44,7 @@
         <el-row class="custom">
             <el-col
                 v-for="(chart, index) in custom.dashboard.charts"
-                :key="index"
+                :key="index + JSON.stringify(route.query)"
                 :xs="24"
                 :sm="12"
             >
@@ -236,7 +236,7 @@
     import moment from "moment";
 
     import {apiUrl} from "override/utils/route";
-    import State from "../../utils/state";
+    import {State} from "@kestra-io/ui-libs"
 
     import Header from "./components/Header.vue";
     import Card from "./components/Card.vue";
@@ -581,13 +581,9 @@ $spacing: 20px;
             padding-bottom: $spacing;
 
             & div {
-                background: var(--card-bg);
-                border: 1px solid var(--bs-gray-300);
+                background: var(--ks-background-card);
+                border: 1px solid var(--ks-border-primary);
                 border-radius: $border-radius;
-
-                html.dark & {
-                    border-color: var(--bs-gray-600);
-                }
             }
         }
     }
@@ -622,7 +618,7 @@ $spacing: 20px;
 .description {
     padding: 0px 32px;
     margin: 0;
-    color: var(--bs-gray-700);
+    color: var(--ks-content-secondary);
 }
 
 .custom {
@@ -640,13 +636,9 @@ $spacing: 20px;
 
             & > div {
                 height: 100%;
-                background: var(--card-bg);
-                border: 1px solid var(--bs-gray-300);
+                background: var(--ks-background-card);
+                border: 1px solid var(--ks-border-primary);
                 border-radius: $border-radius;
-
-                html.dark & {
-                    border-color: var(--bs-gray-600);
-                }
             }
         }
     }
@@ -659,11 +651,11 @@ $spacing: 20px;
     }
 
     &::-webkit-scrollbar-track {
-        background: var(--card-bg);
+        background: var(--ks-background-card);
     }
 
     &::-webkit-scrollbar-thumb {
-        background: var(--bs-primary);
+        background: var(--ks-button-background-primary);
         border-radius: 0px;
     }
 }

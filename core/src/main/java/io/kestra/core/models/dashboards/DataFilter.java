@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
@@ -29,6 +30,7 @@ public abstract class DataFilter<F extends Enum<F>, C extends ColumnDescriptor<F
 
     private Map<String, C> columns;
 
+    @Setter
     private List<AbstractFilter<F>> where;
 
     private List<OrderBy> orderBy;
@@ -38,4 +40,7 @@ public abstract class DataFilter<F extends Enum<F>, C extends ColumnDescriptor<F
     }
 
     public abstract Class<? extends QueryBuilderInterface<F>> repositoryClass();
+
+    public abstract void setGlobalFilter(GlobalFilter globalFilter);
+
 }

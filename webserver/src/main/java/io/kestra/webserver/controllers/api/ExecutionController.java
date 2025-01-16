@@ -879,9 +879,22 @@ public class ExecutionController {
 
         this.controlRevision(execution.get(), revision);
 
-        Execution replay = executionService.replay(execution.get(), taskRunId, revision);
+        return innerReplay(execution.get(), taskRunId, revision);
+    }
+
+    private Execution innerReplay(Execution execution, @Nullable String taskRunId, @Nullable Integer revision) throws Exception {
+        Execution replay = executionService.replay(execution, taskRunId, revision);
         executionQueue.emit(replay);
-        eventPublisher.publishEvent(new CrudEvent<>(replay, execution.get(), CrudEventType.CREATE));
+        eventPublisher.publishEvent(new CrudEvent<>(replay, execution, CrudEventType.CREATE));
+
+        // update parent exec with replayed label
+        List<Label> newLabels = new ArrayList<>(execution.getLabels());
+        if (!newLabels.contains(new Label(Label.REPLAYED, "true"))) {
+            newLabels.add(new Label(Label.REPLAYED, "true"));
+        }
+        Execution newExecution = execution.withLabels(newLabels);
+        eventPublisher.publishEvent(new CrudEvent<>(newExecution, execution, CrudEventType.UPDATE));
+        executionRepository.save(newExecution);
 
         return replay;
     }
@@ -1440,9 +1453,7 @@ public class ExecutionController {
         }
 
         for (Execution execution : executions) {
-            Execution replay = executionService.replay(execution, null, null);
-            executionQueue.emit(replay);
-            eventPublisher.publishEvent(new CrudEvent<>(replay, execution, CrudEventType.CREATE));
+            innerReplay(execution, null, null);
         }
 
         return HttpResponse.ok(BulkResponse.builder().count(executions.size()).build());
@@ -1463,8 +1474,11 @@ public class ExecutionController {
 
         return Flux
             .<Event<Execution>>create(emitter -> {
+                // send a first "empty" event so the SSE is correctly initialized in the frontend in case there are no logs
+                emitter.next(Event.of(Execution.builder().id(executionId).build()).id("start"));
+
                 // already finished execution
-                Execution execution = null;
+                Execution execution;
                 try {
                     execution = Await.until(
                         () -> executionRepository.findById(tenantService.resolveTenant(), executionId).orElse(null),

@@ -335,11 +335,15 @@ public class Execution implements DeletedInterface, TenantInterface {
      *
      * @param resolvedTasks normal tasks
      * @param resolvedErrors errors tasks
+     * @param resolvedErrors finally tasks
      * @return the flow we need to follow
      */
-    public List<ResolvedTask> findTaskDependingFlowState(List<ResolvedTask> resolvedTasks,
-        List<ResolvedTask> resolvedErrors) {
-        return this.findTaskDependingFlowState(resolvedTasks, resolvedErrors, null);
+    public List<ResolvedTask> findTaskDependingFlowState(
+        List<ResolvedTask> resolvedTasks,
+        List<ResolvedTask> resolvedErrors,
+        List<ResolvedTask> resolvedFinally
+    ) {
+        return this.findTaskDependingFlowState(resolvedTasks, resolvedErrors, resolvedFinally, null);
     }
 
     /**
@@ -349,15 +353,27 @@ public class Execution implements DeletedInterface, TenantInterface {
      *
      * @param resolvedTasks normal tasks
      * @param resolvedErrors errors tasks
+     * @param resolvedFinally finally tasks
      * @param parentTaskRun the parent task
      * @return the flow we need to follow
      */
-    public List<ResolvedTask> findTaskDependingFlowState(List<ResolvedTask> resolvedTasks,
-        @Nullable List<ResolvedTask> resolvedErrors, TaskRun parentTaskRun) {
+    public List<ResolvedTask> findTaskDependingFlowState(
+        List<ResolvedTask> resolvedTasks,
+        @Nullable List<ResolvedTask> resolvedErrors,
+        @Nullable List<ResolvedTask> resolvedFinally,
+        TaskRun parentTaskRun
+    ) {
         resolvedTasks = removeDisabled(resolvedTasks);
         resolvedErrors = removeDisabled(resolvedErrors);
+        resolvedFinally = removeDisabled(resolvedFinally);
 
         List<TaskRun> errorsFlow = this.findTaskRunByTasks(resolvedErrors, parentTaskRun);
+        List<TaskRun> finallyFlow = this.findTaskRunByTasks(resolvedFinally, parentTaskRun);
+
+        // finally is already started, just continue theses finally
+        if (!finallyFlow.isEmpty()) {
+            return resolvedFinally == null ? Collections.emptyList() : resolvedFinally;
+        }
 
         // Check if flow has failed task
         if (!errorsFlow.isEmpty() || this.hasFailed(resolvedTasks, parentTaskRun)) {
@@ -366,8 +382,17 @@ public class Execution implements DeletedInterface, TenantInterface {
                 return Collections.emptyList();
             }
 
-            return resolvedErrors == null ? Collections.emptyList() : resolvedErrors;
+            if (resolvedFinally != null && resolvedErrors != null && !this.isTerminated(resolvedErrors, parentTaskRun)) {
+                return resolvedErrors;
+            } else if (resolvedFinally == null) {
+                return resolvedErrors == null ? Collections.emptyList() : resolvedErrors;
+            }
+        }
 
+        if (resolvedFinally != null && (
+            this.isTerminated(resolvedTasks, parentTaskRun) || this.hasFailed(resolvedTasks, parentTaskRun
+        ))) {
+            return resolvedFinally;
         }
 
         return resolvedTasks;
@@ -390,8 +415,7 @@ public class Execution implements DeletedInterface, TenantInterface {
             .toList();
     }
 
-    public List<TaskRun> findTaskRunByTasks(List<ResolvedTask> resolvedTasks,
-        TaskRun parentTaskRun) {
+    public List<TaskRun> findTaskRunByTasks(List<ResolvedTask> resolvedTasks, TaskRun parentTaskRun) {
         if (resolvedTasks == null || this.taskRunList == null) {
             return Collections.emptyList();
         }

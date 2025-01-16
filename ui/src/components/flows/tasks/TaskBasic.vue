@@ -136,11 +136,6 @@
     .el-form-item.is-required:not(.is-no-asterisk).asterisk-left {
         > :deep(.el-form-item__label) {
             display: flex;
-
-            &::before {
-
-            }
-
         }
     }
 

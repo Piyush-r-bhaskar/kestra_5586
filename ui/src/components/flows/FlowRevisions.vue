@@ -244,7 +244,7 @@
 
     .ks-editor {
         flex: 1;
-        padding-bottom: var(--spacer);
+        padding-bottom: 1rem;
     }
 
     .revision-select {

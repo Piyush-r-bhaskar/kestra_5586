@@ -677,7 +677,8 @@
             "log_level": "Domyślna Poziom Logs",
             "log_display": "Domyślne Wyświetlanie Log",
             "execute_flow": "Wykonaj Flow",
-            "execute_default_tab": "Domyślna karta Execution"
+            "execute_default_tab": "Domyślna karta Execution",
+            "editor_type": "Domyślny typ edytora"
           }
         },
         "theme": {
@@ -872,14 +873,17 @@
       "not_auth": "Nie masz niezbędnych uprawnień, aby wyświetlić ten widget.",
       "see_all": "Zobacz wszystkie",
       "success_ratio_tooltip": "Wskaźnik Sukcesu to suma wykonań w stanach SUCCESS, CANCELLED i WARNING podzielona przez całkowitą liczbę wykonań w stanie zakończonym.",
-      "failure_ratio_tooltip": "Stosunek niepowodzeń to suma wykonań w stanach FAILED, KILLED i RETRIED podzielona przez całkowitą liczbę wykonań w stanie zakończonym."
+      "failure_ratio_tooltip": "Stosunek niepowodzeń to suma wykonań w stanach FAILED, KILLED i RETRIED podzielona przez całkowitą liczbę wykonań w stanie zakończonym.",
+      "preview": "Podgląd Dashboardu"
     },
     "delete_log": "Czy na pewno chcesz usunąć log?",
     "docs": "Dokumentacja",
     "behavior": "Zachowanie",
     "concurrency-view": {
       "desc_no_limit": "Przeczytaj więcej o <strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">Limitach Concurrency</a></strong> w naszej dokumentacji.",
-      "title_no_limit": "Brak limitów ustawionych dla tego Flow."
+      "title_no_limit": "Brak limitów ustawionych dla tego Flow.",
+      "desc_no_executions": "Przeczytaj więcej o <strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Executions</a></strong> w naszej dokumentacji.",
+      "title_no_executions": "Brak trwających Executions dla tego Flow."
     },
     "active-slots": "Aktywne sloty",
     "concurrency": "Współbieżność",
@@ -1036,6 +1040,53 @@
       "format": "Wpisz parametr jako 'key:value'",
       "label": "Wybierz filtry"
     },
-    "custom value": "Wartość niestandardowa"
+    "custom value": "Wartość niestandardowa",
+    "execution restarted": "Ta wykonanie zostało ponownie uruchomione {nbRestart} raz(y).",
+    "chart": "Wykres",
+    "source only": "Tylko źródło",
+    "chart preview": "Podgląd wykresu",
+    "execution replayed": "To wykonanie zostało odtworzone.",
+    "execution replay": "To wykonanie jest powtórką <code>{originalId}</code>.",
+    "no_code": {
+      "fields": {
+        "main": {
+          "description": "Opis",
+          "namespace": "Namespace",
+          "flow_id": "Identyfikator flow"
+        },
+        "general": {
+          "plugin_defaults": "Domyślne ustawienia pluginu",
+          "variables": "Zmienne",
+          "labels": "Etykiety",
+          "outputs": "Wyjścia",
+          "concurrency": "Współbieżność",
+          "inputs": "Wejścia",
+          "retry": "Ponów próbę",
+          "disabled": "Wyłączony"
+        }
+      },
+      "sections": {
+        "general": "Właściwości ogólne",
+        "triggers": "Triggery",
+        "main": "Główne właściwości",
+        "error_handlers": "Obsługa błędów",
+        "tasks": "Zadania"
+      },
+      "creation": {
+        "select": "Wybierz {section}",
+        "tasks": "Dodaj task",
+        "error handlers": "Dodaj obsługę błędów",
+        "triggers": "Dodaj trigger"
+      },
+      "save": {
+        "tasks": "Zapisz task",
+        "triggers": "Zapisz trigger"
+      },
+      "labels": {
+        "no_code": "Edytor No Code",
+        "yaml": "Edytor YAML"
+      },
+      "adding": "+ Dodaj {what}"
+    }
   }
 }

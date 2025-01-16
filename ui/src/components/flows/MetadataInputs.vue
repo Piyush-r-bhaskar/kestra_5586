@@ -1,17 +1,20 @@
 <template>
-    <div class="w-100 d-flex flex-column align-items-center">
-        <drawer
-            v-if="isEditOpen"
-            v-model="isEditOpen"
-        >
+    <span v-if="required" class="me-1 text-danger">*</span>
+    <span class="label">{{ label }}</span>
+    <div class="mt-1 mb-2 wrapper">
+        <drawer v-if="isEditOpen" v-model="isEditOpen">
             <template #header>
                 <code>inputs</code>
             </template>
 
             <template #footer>
                 <div>
-                    <el-button :icon="ContentSave" @click="update()" type="primary">
-                        {{ $t('save') }}
+                    <el-button
+                        :icon="ContentSave"
+                        @click="update()"
+                        type="primary"
+                    >
+                        {{ $t("save") }}
                     </el-button>
                 </div>
             </template>
@@ -40,21 +43,27 @@
         </drawer>
         <div class="w-100">
             <div>
-                <div class="d-flex w-100" v-for="(input, index) in newInputs" :key="index">
+                <div
+                    class="d-flex w-100 mb-2"
+                    v-for="(input, index) in newInputs"
+                    :key="index"
+                >
                     <div class="flex-fill flex-grow-1 w-100 me-2">
-                        <el-input
-                            disabled
-                            :model-value="input.id"
-                        />
+                        <el-input disabled :model-value="input.id" />
                     </div>
                     <div class="flex-shrink-1">
                         <el-button-group class="d-flex flex-nowrap">
-                            <el-button :icon="TextSearch" @click="selectInput(input, index)" />
+                            <el-button
+                                :icon="TextSearch"
+                                @click="selectInput(input, index)"
+                            />
                             <el-button :icon="Plus" @click="addInput" />
                             <el-button
                                 :icon="Minus"
                                 @click="deleteInput(index)"
-                                :disabled="index === 0 && newInputs.length === 1"
+                                :disabled="
+                                    index === 0 && newInputs.length === 1
+                                "
                             />
                         </el-button-group>
                     </div>
@@ -78,10 +87,17 @@
         components: {Drawer},
         emits: ["update:modelValue"],
         props: {
+            modelValue: {
+                type: Array,
+                default: () => [],
+            },
             inputs: {
                 type: Array,
-                default: () => []
-            }
+                default: () => [],
+            },
+            label: {type: String, required: true},
+            required: {type: Boolean, default: false},
+            disabled: {type: Boolean, default: false},
         },
         computed: {
             ...mapState("plugin", ["inputSchema", "inputsType"]),
@@ -91,9 +107,9 @@
                 this.newInputs = this.inputs;
             }
 
-            this.$store.dispatch("plugin/loadInputsType")
-                .then(_ => this.loading = false);
-
+            this.$store
+                .dispatch("plugin/loadInputsType")
+                .then((_) => (this.loading = false));
         },
         data() {
             return {
@@ -101,8 +117,8 @@
                 selectedInput: undefined,
                 selectedIndex: undefined,
                 isEditOpen: false,
-                loading: false
-            }
+                loading: false,
+            };
         },
         methods: {
             selectInput(input, index) {
@@ -110,20 +126,24 @@
                 this.selectedInput = input;
                 this.selectedIndex = index;
                 this.isEditOpen = true;
-                this.loadSchema(input.type)
+                this.loadSchema(input.type);
             },
             getCls(type) {
-                return this.inputsType.find(e => e.type === type).cls
+                return this.inputsType.find((e) => e.type === type).cls;
             },
             getType(cls) {
-                return this.inputsType.find(e => e.cls === cls).type
+                return this.inputsType.find((e) => e.cls === cls).type;
             },
             loadSchema(type) {
-                this.$store.dispatch("plugin/loadInputSchema", {type: type})
-                    .then(_ => this.loading = false);
+                this.$store
+                    .dispatch("plugin/loadInputSchema", {type: type})
+                    .then((_) => (this.loading = false));
             },
             update() {
-                if (this.newInputs.map(e => e.id).length !== new Set(this.newInputs.map(e => e.id)).size) {
+                if (
+                    this.newInputs.map((e) => e.id).length !==
+                    new Set(this.newInputs.map((e) => e.id)).size
+                ) {
                     this.$store.dispatch("core/showMessage", {
                         variant: "error",
                         title: this.$t("error"),
@@ -145,10 +165,17 @@
             },
             onChangeType(value) {
                 this.loading = true;
-                this.selectedInput = {type: value, id: this.newInputs[this.selectedIndex].id};
+                this.selectedInput = {
+                    type: value,
+                    id: this.newInputs[this.selectedIndex].id,
+                };
                 this.newInputs[this.selectedIndex] = this.selectedInput;
-                this.loadSchema(value)
-            }
+                this.loadSchema(value);
+            },
         },
     };
 </script>
+
+<style scoped lang="scss">
+@import "../../components/code/styles/code.scss";
+</style>

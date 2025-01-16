@@ -31,8 +31,7 @@
 
     import OpenInNew from "vue-material-design-icons/OpenInNew.vue";
 
-    import useMarkdownParser from "@kestra-io/ui-libs/src/composables/useMarkdownParser";
-    import MDCRenderer from "@kestra-io/ui-libs/src/components/content/MDCRenderer.vue";
+    import {MDCRenderer, getMDCParser} from "@kestra-io/ui-libs";
     import DocsLayout from "./DocsLayout.vue";
     import ContextDocsLink from "./ContextDocsLink.vue";
     import ContextChildCard from "./ContextChildCard.vue";
@@ -40,7 +39,6 @@
     import ContextInfoContent from "../ContextInfoContent.vue";
     import ContextChildTableOfContents from "./ContextChildTableOfContents.vue";
 
-    const parse = useMarkdownParser();
     const store = useStore();
     const {t} = useI18n({useScope: "global"});
 
@@ -85,7 +83,7 @@
             try {
                 response = await store.dispatch("doc/fetchAppId", docId)
             } catch {
-                // eat the error
+            // eat the error
             }
         }
 
@@ -102,6 +100,7 @@
         if (!("canShare" in navigator)) {
             content = content.replaceAll(/\s*web-share\s*/g, "");
         }
+        const parse = await getMDCParser()
         ast.value = await parse(content);
     }
 </script>
@@ -109,7 +108,7 @@
 <style lang="scss" scoped>
     .blank {
         margin-top: 4px;
-        margin-left: var(--spacer);
-        color: var(--bs-tertiary-color);
+        margin-left: 1rem;
+        color: var(--ks-content-tertiary);
     }
 </style>

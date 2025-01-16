@@ -9,6 +9,7 @@ import io.kestra.core.models.SearchResult;
 import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.flows.*;
 import io.kestra.core.models.flows.input.StringInput;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.queues.QueueException;
 import io.kestra.core.schedulers.AbstractSchedulerTest;
 import io.kestra.core.serializers.JacksonMapper;
@@ -74,7 +75,7 @@ public abstract class AbstractFlowRepositoryTest {
         return Flow.builder()
             .id(flowId)
             .namespace("io.kestra.unittest")
-            .tasks(Collections.singletonList(Return.builder().id(taskId).type(Return.class.getName()).format("test").build()));
+            .tasks(Collections.singletonList(Return.builder().id(taskId).type(Return.class.getName()).format(Property.of("test")).build()));
     }
 
     @Test
@@ -141,7 +142,7 @@ public abstract class AbstractFlowRepositoryTest {
         Flow first = Flow.builder()
             .id(flowId)
             .namespace("io.kestra.unittest")
-            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
             .inputs(ImmutableList.of(StringInput.builder().type(Type.STRING).id("a").build()))
             .build();
         // create with repository
@@ -384,7 +385,7 @@ public abstract class AbstractFlowRepositoryTest {
             .id(flowId)
             .namespace("io.kestra.unittest")
             .inputs(ImmutableList.of(StringInput.builder().type(Type.STRING).id("a").build()))
-            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
             .build();
 
         Flow save = flowRepository.create(flow, flow.generateSource(), pluginDefaultService.injectDefaults(flow.withSource(flow.generateSource())));
@@ -396,7 +397,7 @@ public abstract class AbstractFlowRepositoryTest {
                 .id(IdUtils.create())
                 .namespace("io.kestra.unittest2")
                 .inputs(ImmutableList.of(StringInput.builder().type(Type.STRING).id("b").build()))
-                .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+                .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
                 .build();
             ;
 
@@ -422,7 +423,7 @@ public abstract class AbstractFlowRepositoryTest {
                 .id("sleep")
                 .type(AbstractSchedulerTest.UnitTest.class.getName())
                 .build()))
-            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
             .build();
 
         flow = flowRepository.create(flow, flow.generateSource(), pluginDefaultService.injectDefaults(flow.withSource(flow.generateSource())));
@@ -432,7 +433,7 @@ public abstract class AbstractFlowRepositoryTest {
             Flow update = Flow.builder()
                 .id(flowId)
                 .namespace("io.kestra.unittest")
-                .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+                .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
                 .build();
             ;
 
@@ -460,7 +461,7 @@ public abstract class AbstractFlowRepositoryTest {
                 .id("sleep")
                 .type(AbstractSchedulerTest.UnitTest.class.getName())
                 .build()))
-            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
             .build();
 
         Flow save = flowRepository.create(flow, flow.generateSource(), pluginDefaultService.injectDefaults(flow.withSource(flow.generateSource())));
@@ -533,7 +534,7 @@ public abstract class AbstractFlowRepositoryTest {
             .tenantId(tenantId)
             .id(flowId)
             .namespace(namespace)
-            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format("test").build()))
+            .tasks(Collections.singletonList(Return.builder().id("test").type(Return.class.getName()).format(Property.of("test")).build()))
             .inputs(ImmutableList.of(StringInput.builder().type(Type.STRING).id("a").build()))
             .build();
         // create with repository

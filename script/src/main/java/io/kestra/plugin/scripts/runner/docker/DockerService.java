@@ -1,6 +1,7 @@
 package io.kestra.plugin.scripts.runner.docker;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.NameParser;
@@ -48,6 +49,26 @@ public class DockerService {
         }
 
         return "unix:///dind/docker.sock";
+    }
+
+    public static DockerClient client(RunContext runContext, @Nullable String host, @Nullable Object config, @Nullable Credentials credentials, @Nullable String image) throws IOException, IllegalVariableEvaluationException {
+        DefaultDockerClientConfig.Builder dockerClientConfigBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder()
+            .withDockerHost(DockerService.findHost(runContext, host));
+
+        if (config != null || credentials != null) {
+            Path configPath = DockerService.createConfig(
+                runContext,
+                config,
+                credentials != null ? List.of(credentials) : null,
+                image
+            );
+
+            dockerClientConfigBuilder.withDockerConfig(configPath.toFile().getAbsolutePath());
+        }
+
+        DockerClientConfig dockerClientConfig = dockerClientConfigBuilder.build();
+
+        return DockerService.client(dockerClientConfig);
     }
 
     @SuppressWarnings("unchecked")

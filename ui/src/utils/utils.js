@@ -168,6 +168,33 @@ export default class Utils {
         document.body.removeChild(link);
     }
 
+    /**
+     * Extracts a filename from an HTTP 'Content-Disposition` header.
+     *
+     * @param header  the header value
+     * @returns {*|string|null}
+     */
+    static extratFileNameFromContentDisposition(header) {
+        if (!header) return null;
+
+        const filenameRegex = /filename\*=UTF-8''(.+)|filename="(.+?)"|filename=(.+)/;
+        const matches = header.match(filenameRegex);
+
+        // Check for UTF-8 encoded filename first
+        if (matches && matches[1]) {
+            return decodeURIComponent(matches[1]);
+        }
+        // Fallback to quoted or unquoted filename
+        if (matches && matches[2]) {
+            return matches[2];
+        }
+        if (matches && matches[3]) {
+            return matches[3];
+        }
+
+        return null; // Return null if no filename is found
+    }
+
     static switchTheme(theme) {
         // default theme
         if (theme === undefined) {
@@ -251,5 +278,16 @@ export default class Utils {
 
     static distinctFilter(value, index, array) {
         return array.indexOf(value) === index;
+    }
+
+    static toFormData(obj) {
+        if (!(obj instanceof FormData)) {
+            const formData = new FormData();
+            for (const key in obj) {
+                formData.append(key, obj[key]);
+            }
+            return formData;
+        }
+        return obj;
     }
 }

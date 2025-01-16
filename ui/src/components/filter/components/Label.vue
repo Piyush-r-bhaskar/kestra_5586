@@ -41,7 +41,7 @@
 </script>
 
 <style scoped lang="scss">
-@import "../styles/filter.scss";
+@import "../styles/filter";
 
 .comparator {
     display: inline-block;

@@ -677,7 +677,8 @@
             "log_level": "Уровень логов по умолчанию",
             "log_display": "Отображение логов по умолчанию",
             "execute_flow": "Выполнить Flow",
-            "execute_default_tab": "Вкладка выполнения по умолчанию"
+            "execute_default_tab": "Вкладка выполнения по умолчанию",
+            "editor_type": "Тип редактора по умолчанию"
           }
         },
         "theme": {
@@ -872,14 +873,17 @@
       "not_auth": "У вас нет необходимых разрешений для просмотра этого виджета.",
       "see_all": "Посмотреть все",
       "success_ratio_tooltip": "Коэффициент успеха — это сумма выполнений в состояниях SUCCESS, CANCELLED и WARNING, деленная на общее количество выполнений в завершенном состоянии.",
-      "failure_ratio_tooltip": "Отношение Failed — это сумма выполнений в состояниях FAILED, KILLED и RETRIED, деленная на общее количество выполнений в завершенном состоянии."
+      "failure_ratio_tooltip": "Отношение Failed — это сумма выполнений в состояниях FAILED, KILLED и RETRIED, деленная на общее количество выполнений в завершенном состоянии.",
+      "preview": "Предварительный просмотр Dashboard"
     },
     "delete_log": "Вы уверены, что хотите удалить log?",
     "docs": "Документы",
     "behavior": "Поведение",
     "concurrency-view": {
       "desc_no_limit": "Узнайте больше о <strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">ограничениях Concurrency</a></strong> в нашей документации.",
-      "title_no_limit": "Для этого Flow не установлены ограничения."
+      "title_no_limit": "Для этого Flow не установлены ограничения.",
+      "desc_no_executions": "Узнайте больше о <strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Executions</a></strong> в нашей документации.",
+      "title_no_executions": "Нет выполняющихся Executions для этого Flow."
     },
     "active-slots": "Активные слоты",
     "concurrency": "Конкурентность",
@@ -1036,6 +1040,53 @@
       "format": "Введите параметр в формате 'key:value'",
       "label": "Выберите фильтры"
     },
-    "custom value": "Пользовательское значение"
+    "custom value": "Пользовательское значение",
+    "execution restarted": "Это выполнение было перезапущено {nbRestart} раз(а).",
+    "chart": "График",
+    "source only": "Источник только",
+    "chart preview": "Предварительный просмотр диаграммы",
+    "execution replayed": "Это выполнение было воспроизведено.",
+    "execution replay": "Это выполнение является повтором <code>{originalId}</code>.",
+    "no_code": {
+      "fields": {
+        "main": {
+          "description": "Описание",
+          "namespace": "Namespace",
+          "flow_id": "ID потока"
+        },
+        "general": {
+          "plugin_defaults": "Настройки плагина по умолчанию",
+          "variables": "Переменные",
+          "labels": "Метки",
+          "outputs": "Выходы",
+          "concurrency": "Конкурентность",
+          "inputs": "Входные данные",
+          "retry": "Повторить попытку",
+          "disabled": "Отключено"
+        }
+      },
+      "sections": {
+        "general": "Общие свойства",
+        "triggers": "Триггеры",
+        "main": "Основные свойства",
+        "error_handlers": "Обработчики ошибок",
+        "tasks": "Задачи"
+      },
+      "creation": {
+        "select": "Выберите {section}",
+        "tasks": "Добавить task",
+        "error handlers": "Добавить обработчик ошибок",
+        "triggers": "Добавить trigger"
+      },
+      "save": {
+        "tasks": "Сохранить task",
+        "triggers": "Сохранить trigger"
+      },
+      "labels": {
+        "no_code": "Редактор No Code",
+        "yaml": "Редактор YAML"
+      },
+      "adding": "+ Добавить {what}"
+    }
   }
 }

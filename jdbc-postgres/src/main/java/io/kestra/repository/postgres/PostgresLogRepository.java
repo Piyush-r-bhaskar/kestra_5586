@@ -2,6 +2,7 @@ package io.kestra.repository.postgres;
 
 import io.kestra.core.models.executions.LogEntry;
 import io.kestra.jdbc.repository.AbstractJdbcLogRepository;
+import io.kestra.jdbc.services.JdbcFilterService;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -18,8 +19,9 @@ import java.util.stream.Collectors;
 @PostgresRepositoryEnabled
 public class PostgresLogRepository extends AbstractJdbcLogRepository {
     @Inject
-    public PostgresLogRepository(@Named("logs") PostgresRepository<LogEntry> repository) {
-        super(repository);
+    public PostgresLogRepository(@Named("logs") PostgresRepository<LogEntry> repository,
+                                 JdbcFilterService filterService) {
+        super(repository, filterService);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.kestra.core.models.flows;
 
 import io.kestra.core.exceptions.InternalException;
+import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.Task;
 import io.kestra.core.models.validations.ModelValidator;
 import io.kestra.core.serializers.YamlParser;
@@ -114,13 +115,13 @@ class FlowTest {
         Flow updated = flow.updateTask("1-2-2_return", Return.builder()
             .id("1-2-2_return")
             .type(Return.class.getName())
-            .format("{{task.id}}")
+            .format(new Property<>("{{task.id}}"))
             .build()
         );
 
         Task findUpdated = updated.findTaskByTaskId("1-2-2_return");
 
-        assertThat(((Return) findUpdated).getFormat(), is("{{task.id}}"));
+        assertThat(((Return) findUpdated).getFormat().toString(), is("{{task.id}}"));
     }
 
     @Test

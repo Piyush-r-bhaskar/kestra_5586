@@ -14,7 +14,7 @@ export default {
     computed: {
         localStorageName() {
             const tenant = this.$route.params.tenant;
-            return `${this.$route.name.replace("/", "_")}${tenant ? "_" + tenant : ""}_restore_url`
+            return `${this.$route.name?.replace("/", "_")}${tenant ? "_" + tenant : ""}_restore_url`
         },
 
         localStorageValue() {

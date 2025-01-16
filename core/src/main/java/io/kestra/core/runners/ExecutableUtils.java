@@ -11,7 +11,10 @@ import io.kestra.core.models.flows.State;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.ExecutableTask;
 import io.kestra.core.models.tasks.Task;
+import io.kestra.core.repositories.ExecutionRepositoryInterface;
+import io.kestra.core.services.ExecutionService;
 import io.kestra.core.storages.Storage;
+import io.kestra.core.utils.MapUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.stream.Streams;
 
@@ -53,7 +56,7 @@ public final class ExecutableUtils {
             .build();
     }
 
-    public static <T extends Task & ExecutableTask<?>> SubflowExecution<?> subflowExecution(
+    public static <T extends Task & ExecutableTask<?>> Optional<SubflowExecution<?>> subflowExecution(
         RunContext runContext,
         FlowExecutorInterface flowExecutorInterface,
         Execution currentExecution,
@@ -65,6 +68,51 @@ public final class ExecutableUtils {
         boolean inheritLabels,
         Property<ZonedDateTime> scheduleDate
     ) throws IllegalVariableEvaluationException {
+        // If we are in a flow that is restarted, we search for existing run of the task to restart them
+        if (currentExecution.getLabels() != null && currentExecution.getLabels().contains(new Label(Label.RESTARTED, "true"))
+            && currentTask.getRestartBehavior() == ExecutableTask.RestartBehavior.RETRY_FAILED) {
+            ExecutionRepositoryInterface executionRepository = ((DefaultRunContext) runContext).getApplicationContext().getBean(ExecutionRepositoryInterface.class);
+
+            Optional<Execution> existingSubflowExecution = Optional.empty();
+            if (currentTaskRun.getOutputs() != null && currentTaskRun.getOutputs().containsKey("executionId")) {
+                // we know which execution to restart; this should be the case for Subflow tasks
+                existingSubflowExecution = executionRepository.findById(currentExecution.getTenantId(), (String) currentTaskRun.getOutputs().get("executionId"));
+            }
+
+            if (existingSubflowExecution.isEmpty()) {
+                // otherwise, we try to find the correct one; this should be the case for ForEachItem tasks
+                List<Execution> childExecutions = executionRepository.findAllByTriggerExecutionId(currentExecution.getTenantId(), currentExecution.getId())
+                    .filter(e -> e.getNamespace().equals(currentTask.subflowId().namespace()) && e.getFlowId().equals(currentTask.subflowId().flowId()) && e.getTrigger().getId().equals(currentTask.getId()))
+                    .filter(e -> Objects.equals(e.getTrigger().getVariables().get("taskRunId"), currentTaskRun.getId()) && Objects.equals(e.getTrigger().getVariables().get("taskRunValue"), currentTaskRun.getValue()) && Objects.equals(e.getTrigger().getVariables().get("taskRunIteration"), currentTaskRun.getIteration()))
+                    .collectList()
+                    .block();
+
+                if (childExecutions != null && childExecutions.size() == 1) {
+                    // if there are more than one, we ignore the results and create a new one
+                    existingSubflowExecution = Optional.of(childExecutions.getFirst());
+                }
+            }
+
+            if (existingSubflowExecution.isPresent()) {
+                Execution subflowExecution = existingSubflowExecution.get();
+                if (!subflowExecution.getState().isFailed()) {
+                    // don't restart it as it's terminated successfully
+                    return Optional.empty();
+                }
+                ExecutionService executionService = ((DefaultRunContext) runContext).getApplicationContext().getBean(ExecutionService.class);
+                try {
+                    Execution restarted = executionService.restart(subflowExecution, null);
+                    return Optional.of(SubflowExecution.builder()
+                        .parentTask(currentTask)
+                        .parentTaskRun(currentTaskRun.withState(State.Type.RUNNING))
+                        .execution(restarted)
+                        .build());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
         String subflowNamespace = runContext.render(currentTask.subflowId().namespace());
         String subflowId = runContext.render(currentTask.subflowId().flowId());
         Optional<Integer> subflowRevision = currentTask.subflowId().revision();
@@ -93,12 +141,19 @@ public final class ExecutableUtils {
             labels.forEach(throwConsumer(label -> newLabels.add(new Label(runContext.render(label.key()), runContext.render(label.value())))));
         }
 
-        Map<String, Object> variables = ImmutableMap.of(
+        var variables = ImmutableMap.<String, Object>builder().putAll(Map.of(
             "executionId", currentExecution.getId(),
             "namespace", currentFlow.getNamespace(),
             "flowId", currentFlow.getId(),
-            "flowRevision", currentFlow.getRevision()
-        );
+            "flowRevision", currentFlow.getRevision(),
+            "taskRunId", currentTaskRun.getId()
+        ));
+        if (currentTaskRun.getValue() != null) {
+            variables.put("taskRunValue", currentTaskRun.getValue());
+        }
+        if (currentTaskRun.getIteration() != null) {
+            variables.put("taskRunIteration", currentTaskRun.getIteration());
+        }
 
         FlowInputOutput flowInputOutput = ((DefaultRunContext)runContext).getApplicationContext().getBean(FlowInputOutput.class);
         Instant scheduleOnDate = runContext.render(scheduleDate).as(ZonedDateTime.class).map(date -> date.toInstant()).orElse(null);
@@ -111,15 +166,15 @@ public final class ExecutableUtils {
             .withTrigger(ExecutionTrigger.builder()
                 .id(currentTask.getId())
                 .type(currentTask.getType())
-                .variables(variables)
+                .variables(variables.build())
                 .build()
             )
             .withScheduleDate(scheduleOnDate);
-        return SubflowExecution.builder()
+        return Optional.of(SubflowExecution.builder()
             .parentTask(currentTask)
             .parentTaskRun(currentTaskRun.withState(State.Type.RUNNING))
             .execution(execution)
-            .build();
+            .build());
     }
 
     private static List<Label> systemLabels(Execution execution) {
@@ -142,7 +197,7 @@ public final class ExecutableUtils {
             Optional.empty();
 
         // search for the previous iterations, if not found, we init it with an empty map
-        Map<String, Integer> iterations = previousTaskRun.getOutputs() != null ?
+        Map<String, Integer> iterations = !MapUtils.isEmpty(previousTaskRun.getOutputs()) ?
             (Map<String, Integer>) previousTaskRun.getOutputs().get(TASK_VARIABLE_ITERATIONS) :
             new HashMap<>();
 
@@ -151,6 +206,11 @@ public final class ExecutableUtils {
         if (previousState.isPresent() && previousState.get() != currentState) {
             int previousStateIterations = iterations.getOrDefault(previousState.get().toString(), numberOfBatches);
             iterations.put(previousState.get().toString(), previousStateIterations - 1);
+
+            if (previousState.get() == State.Type.RESTARTED) {
+                // if we are in a restart, we need to reset the failed executions
+                iterations.put(State.Type.FAILED.toString(), 0);
+            }
         }
 
         // update the state to success if terminatedIterations == numberOfBatches

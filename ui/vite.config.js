@@ -14,9 +14,6 @@ export default defineConfig({
     resolve: {
         alias: {
             "override": path.resolve(__dirname, "src/override/"),
-            // allow to render at runtime
-            vue: "vue/dist/vue.esm-bundler.js",
-
             "#imports": path.resolve(__dirname, "node_modules/@kestra-io/ui-libs/stub-mdc-imports.js"),
             "#build/mdc-image-component.mjs": path.resolve(__dirname, "node_modules/@kestra-io/ui-libs/stub-mdc-imports.js"),
             "#mdc-imports": path.resolve(__dirname, "node_modules/@kestra-io/ui-libs/stub-mdc-imports.js"),
@@ -49,7 +46,13 @@ export default defineConfig({
     },
     optimizeDeps: {
         include: [
-            "lodash"
+            "lodash",
+            // the 3 dependencies below are used by ui-libs
+            // optimizing them allows storybook to run properly
+            // without allowing interop in typescript
+            "dayjs",
+            "debug",
+            "@braintree/sanitize-url"
         ],
         exclude: [
             "* > @kestra-io/ui-libs"

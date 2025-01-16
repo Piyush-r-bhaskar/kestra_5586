@@ -17,12 +17,12 @@
 </template>
 
 <script>
+    import {YamlUtils} from "@kestra-io/ui-libs";
     import EditorView from "../inputs/EditorView.vue";
     import {mapGetters, mapMutations, mapState} from "vuex";
     import RouteContext from "../../mixins/routeContext";
     import TopNavBar from "../../components/layout/TopNavBar.vue";
     import {apiUrl} from "override/utils/route";
-    import {YamlUtils} from "@kestra-io/ui-libs";
 
     export default {
         mixins: [RouteContext],

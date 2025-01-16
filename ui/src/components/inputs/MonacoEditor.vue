@@ -541,6 +541,9 @@
                 case "task":
                     autocompletions = ["id", "type"];
                     break;
+                case "taskrun":
+                    autocompletions = ["id", "startDate", "attemptsCount", "parentId", "value", "iteration"];
+                    break;
                 case "error":
                     autocompletions = ["taskId", "message", "stackTrace"];
                     break;
@@ -727,7 +730,7 @@
 </style>
 
 <style lang="scss">
-    @import "../../styles/layout/root-dark.scss";
+    @import "../../styles/layout/root-dark";
 
     .custom-dark-vs-theme .ks-monaco-editor .sticky-widget {
         background-color: $input-bg;

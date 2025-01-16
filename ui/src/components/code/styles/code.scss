@@ -1,0 +1,39 @@
+// Coloring
+$code-primary: var(--ks-content-link);
+$code-gray-700: var(--bs-gray-700);
+$code-card-color: var(--ks-background-card);
+$code-border-color: var(--ks-border-primary);
+
+// Typography
+$code-font-sm: var(--el-font-size-small);
+
+.no-code {
+    &::-webkit-scrollbar {
+        height: 5px;
+        width: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: $code-card-color
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $code-border-color;
+        border-radius: 0px;
+    }
+}
+
+.label {
+    color: $code-gray-700;
+    font-size: $code-font-sm;
+}
+
+.wrapper {
+    :deep(*) {
+        --el-disabled-text-color: #{$code-gray-700};
+
+        .el-input__inner {
+            font-size: $code-font-sm;
+        }
+    }
+}

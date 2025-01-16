@@ -6,6 +6,7 @@ import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.serializers.FileSerde;
 import io.kestra.core.storages.StorageInterface;
 import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
 import lombok.Builder;
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
@@ -223,6 +224,49 @@ class PropertyTest {
         var runContext = runContextFactory.of();
 
         assertThrows(IllegalVariableEvaluationException.class, () -> task.run(runContext));
+    }
+
+    @Test
+    void shouldFailValidation() throws Exception {
+        var task = DynamicPropertyExampleTask.builder()
+            .id("dynamic")
+            .type(DynamicPropertyExampleTask.class.getName())
+            .number(new Property<>("{{numberValue}}"))
+            .string(new Property<>("{{stringValue}}"))
+            .level(new Property<>("{{levelValue}}"))
+            .someDuration(new Property<>("{{durationValue}}"))
+            .items(new Property<>("""
+                ["{{item1}}", "{{item2}}"]"""))
+            .properties(new Property<>("""
+                {
+                  "key1": "{{value1}}",
+                  "key2": "{{value2}}"
+                }"""))
+            .data(Data.<DynamicPropertyExampleTask.Message>builder()
+                .fromMap(new Property<>("""
+                    {
+                      "key": "{{mapKey}}",
+                      "value": "{{mapValue}}"
+                    }"""))
+                .build()
+            )
+            .build();
+        var runContext = runContextFactory.of(task, Map.ofEntries(
+            entry("numberValue", -2),
+            entry("stringValue", "test"),
+            entry("levelValue", "INFO"),
+            entry("durationValue", "PT60S"),
+            entry("item1", "item1"),
+            entry("item2", "item2"),
+            entry("value1", "value1"),
+            entry("value2", "value2"),
+            entry("mapKey", "mapKey"),
+            entry("mapValue", "mapValue")
+        ));
+
+        var exception = assertThrows(ConstraintViolationException.class, () -> task.run(runContext));
+        assertThat(exception.getConstraintViolations().size(), is(1));
+        assertThat(exception.getMessage(), is("number: must be greater than or equal to 0"));
     }
 
     @Test

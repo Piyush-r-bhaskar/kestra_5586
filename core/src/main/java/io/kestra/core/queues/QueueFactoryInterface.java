@@ -25,6 +25,7 @@ public interface QueueFactoryInterface {
     String WORKERJOBRUNNING_NAMED = "workerJobRunningQueue";
     String TRIGGER_NAMED = "triggerQueue";
     String SUBFLOWEXECUTIONRESULT_NAMED = "subflowExecutionResultQueue";
+    String CLUSTER_EVENT_NAMED = "clusterEventQueue";
 
     QueueInterface<Execution> execution();
 

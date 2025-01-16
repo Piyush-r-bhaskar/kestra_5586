@@ -228,7 +228,6 @@
     const duration = ref(true);
 </script>
 
-Copy code
 <style lang="scss" scoped>
 @import "@kestra-io/ui-libs/src/scss/variables";
 

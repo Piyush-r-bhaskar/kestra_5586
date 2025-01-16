@@ -677,7 +677,8 @@
             "log_level": "Livello di Log predefinito",
             "log_display": "Visualizzazione Log predefinita",
             "execute_flow": "Esegui il Flow",
-            "execute_default_tab": "Scheda di Esecuzione Predefinita"
+            "execute_default_tab": "Scheda di Esecuzione Predefinita",
+            "editor_type": "Tipo Editor Predefinito"
           }
         },
         "theme": {
@@ -872,14 +873,17 @@
       "not_auth": "Non hai le autorizzazioni necessarie per visualizzare questo widget.",
       "see_all": "Vedi tutto",
       "success_ratio_tooltip": "Il Rapporto di Successo è la somma delle esecuzioni in stato SUCCESS, CANCELLED e WARNING divisa per il numero totale di esecuzioni in uno stato terminato.",
-      "failure_ratio_tooltip": "Il rapporto di errore è la somma delle esecuzioni FAILED, KILLED e RETRIED divisa per il numero totale di esecuzioni in uno stato terminato."
+      "failure_ratio_tooltip": "Il rapporto di errore è la somma delle esecuzioni FAILED, KILLED e RETRIED divisa per il numero totale di esecuzioni in uno stato terminato.",
+      "preview": "Anteprima dashboard"
     },
     "delete_log": "Sei sicuro di voler eliminare il log?",
     "docs": "Documenti",
     "behavior": "Comportamento",
     "concurrency-view": {
       "desc_no_limit": "Leggi di più sui <strong><a href=\"https://kestra.io/docs/workflow-components/concurrency\" target=\"_blank\">Limiti di Concurrency</a></strong> nella nostra documentazione.",
-      "title_no_limit": "Nessun limite è impostato per questo Flow."
+      "title_no_limit": "Nessun limite è impostato per questo Flow.",
+      "desc_no_executions": "Leggi di più sulle <strong><a href=\"https://kestra.io/docs/workflow-components/execution\" target=\"_blank\">Esecuzioni</a></strong> nella nostra documentazione.",
+      "title_no_executions": "Nessuna esecuzione in corso per questo Flow."
     },
     "active-slots": "Slot attivi",
     "concurrency": "Concurrency",
@@ -1036,6 +1040,53 @@
       "format": "Digita il parametro come 'key:value'",
       "label": "Scegli filtri"
     },
-    "custom value": "Valore personalizzato"
+    "custom value": "Valore personalizzato",
+    "execution restarted": "Questa esecuzione è stata riavviata {nbRestart} volta(e).",
+    "chart": "Grafico",
+    "source only": "Solo sorgente",
+    "chart preview": "Anteprima grafico",
+    "execution replayed": "Questa esecuzione è stata ripetuta.",
+    "execution replay": "Questa esecuzione è una ripetizione di <code>{originalId}</code>.",
+    "no_code": {
+      "fields": {
+        "main": {
+          "description": "Descrizione",
+          "namespace": "Namespace",
+          "flow_id": "ID del Flow"
+        },
+        "general": {
+          "plugin_defaults": "Impostazioni Predefinite del Plugin",
+          "variables": "Variabili",
+          "labels": "Etichette",
+          "outputs": "Output",
+          "concurrency": "Concorrenza",
+          "inputs": "Ingressi",
+          "retry": "Riprova",
+          "disabled": "Disabilitato"
+        }
+      },
+      "sections": {
+        "general": "Proprietà generali",
+        "triggers": "Trigger",
+        "main": "Proprietà principali",
+        "error_handlers": "Gestori degli Errori",
+        "tasks": "Attività"
+      },
+      "creation": {
+        "select": "Seleziona una {section}",
+        "tasks": "Aggiungi un task",
+        "error handlers": "Aggiungi un gestore degli errori",
+        "triggers": "Aggiungi un trigger"
+      },
+      "save": {
+        "tasks": "Salva task",
+        "triggers": "Salva trigger"
+      },
+      "labels": {
+        "no_code": "Editor Senza Codice",
+        "yaml": "Editor YAML"
+      },
+      "adding": "+ Aggiungi un {what}"
+    }
   }
 }

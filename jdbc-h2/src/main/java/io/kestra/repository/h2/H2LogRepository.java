@@ -2,6 +2,7 @@ package io.kestra.repository.h2;
 
 import io.kestra.core.models.executions.LogEntry;
 import io.kestra.jdbc.repository.AbstractJdbcLogRepository;
+import io.kestra.jdbc.services.JdbcFilterService;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Singleton;
@@ -13,8 +14,9 @@ import java.util.List;
 @H2RepositoryEnabled
 public class H2LogRepository extends AbstractJdbcLogRepository {
     @Inject
-    public H2LogRepository(@Named("logs") H2Repository<LogEntry> repository) {
-        super(repository);
+    public H2LogRepository(@Named("logs") H2Repository<LogEntry> repository,
+                           JdbcFilterService filterService) {
+        super(repository, filterService);
     }
 
     @Override
