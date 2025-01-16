@@ -89,7 +89,7 @@
                 v-if="!isNamespace"
                 :icon="Download"
                 @click="exportYaml"
-                class="mx-2"
+                class="ms-2 me-0"
             />
 
             <EditorButtons
@@ -334,6 +334,8 @@
     import EditorButtons from "./EditorButtons.vue";
     import Drawer from "../Drawer.vue";
     import {ElMessageBox} from "element-plus";
+
+    import localUtils from "../../utils/utils";
 
     const store = useStore();
     const router = useRouter();
@@ -1275,12 +1277,8 @@
     };
 
     const exportYaml = () => {
-        const yamlContent = flowYaml.value;
-        const blob = new Blob([yamlContent], {type: "text/yaml"});
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "flow.yaml";
-        link.click();
+        const blob = new Blob([flowYaml.value], {type: "text/yaml"});
+        localUtils.downloadUrl(blob, "flow.yaml");
     };
 </script>
 

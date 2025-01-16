@@ -500,7 +500,7 @@
     "add global error handler": "Add global error handler",
     "add error handler": "Add an error handler",
     "add trigger": "Add trigger",
-    "export as yaml": "Download as YAML file",
+    "export_to_file": "Export to file",
     "edit metadata": "Edit Metadata",
     "taskDefaults": "Task Defaults",
     "disabled": "Disabled",

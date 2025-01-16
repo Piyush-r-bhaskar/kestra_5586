@@ -11,9 +11,9 @@
                         v-if="isAllowedEdit"
                         :icon="Download"
                         size="large"
-                        @click="forwardEvent('export-yaml', null)"
+                        @click="forwardEvent('export-yaml')"
                     >
-                        {{ $t("export as yaml") }}
+                        {{ $t("export_to_file") }}
                     </el-dropdown-item>
                     <el-dropdown-item
                         v-if="!isCreating && canDelete"
