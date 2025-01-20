@@ -460,7 +460,7 @@
         cursor: pointer;
         font-weight: bold;
         position: relative;
-        line-height: 2rem;
+        line-height: 1.15rem;
         color: var(--ks-content-error) !important;
         font-size: var(--font-size-sm);
 

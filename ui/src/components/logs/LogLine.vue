@@ -189,8 +189,8 @@
 
 div.line {
     cursor: text;
-    white-space: pre-wrap;
-    word-break: break-all;
+    white-space: wrap;
+    word-break: break-word;
     display: flex;
     align-items: center;
     gap: $spacer;
