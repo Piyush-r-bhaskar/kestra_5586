@@ -42,7 +42,9 @@
     import linkify from "./linkify";
 
 
-    let convert = new Convert();
+    let convert = new Convert({
+        newline: false 
+    });
 
     export default {
         components: {
@@ -157,6 +159,7 @@
                         })
                     );
 
+                logMessage = logMessage.replaceAll("\n", "<br>"); 
                 logMessage = logMessage.replaceAll(
                     /(['"]?)(https?:\/\/[^'"\s]+)(['"]?)/g,
                     "$1<a href='$2' target='_blank'>$2</a>$3"
@@ -189,8 +192,8 @@
 
 div.line {
     cursor: text;
-    white-space: wrap;
-    word-break: break-word;
+    white-space: pre-wrap;
+    word-break: break-all;
     display: flex;
     align-items: center;
     gap: $spacer;
