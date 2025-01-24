@@ -1104,6 +1104,13 @@
         "triggers": "Save trigger",
         "error handlers": "Save error handler"
       }
+    },
+    "properties": {
+      "button": "Properties",
+      "searchPlaceholder": "Search for a property...",
+      "shownInTable": "Shown in Table",
+      "hiddenInTable": "Hidden in Table",
+      "select": "Choose Table Columns"
     }
   }
 }

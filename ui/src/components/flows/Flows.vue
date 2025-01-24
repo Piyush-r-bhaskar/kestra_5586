@@ -54,6 +54,13 @@
                             refresh: {shown: false},
                             settings: {shown: true, charts: {shown: true, value: showChart, callback: onShowChartChange}}
                         }"
+                        :properties="{
+                            shown: true,
+                            columns: optionalColumns,
+                            displayColumns: displayColumns,
+                            storageKey: storageKey
+                        }"
+                        @update:properties="updateDisplayColumns"
                     />
                 </template>
 
@@ -103,6 +110,7 @@
                         <template #default>
                             <el-table-column
                                 prop="id"
+                                v-if="displayColumn('id')"
                                 sortable="custom"
                                 :sort-orders="['ascending', 'descending']"
                                 :label="$t('id')"
@@ -124,7 +132,10 @@
                                 </template>
                             </el-table-column>
 
-                            <el-table-column :label="$t('labels')">
+                            <el-table-column 
+                                v-if="displayColumn('labels')" 
+                                :label="$t('labels')"
+                            >
                                 <template #default="scope">
                                     <labels :labels="scope.row.labels" />
                                 </template>
@@ -132,6 +143,7 @@
 
                             <el-table-column
                                 prop="namespace"
+                                v-if="displayColumn('namespace')"
                                 sortable="custom"
                                 :sort-orders="['ascending', 'descending']"
                                 :label="$t('namespace')"
@@ -140,8 +152,8 @@
 
                             <el-table-column
                                 prop="state.startDate"
+                                v-if="displayColumn('state.startDate') && user.hasAny(permission.EXECUTION)"
                                 :label="$t('last execution date')"
-                                v-if="user.hasAny(permission.EXECUTION)"
                             >
                                 <template #default="scope">
                                     <date-ago v-if="lastExecutionByFlowReady" :inverted="true" :date="getLastExecution(scope.row).startDate" />
@@ -150,8 +162,8 @@
 
                             <el-table-column
                                 prop="state.current"
+                                v-if="displayColumn('state.current') && user.hasAny(permission.EXECUTION)"
                                 :label="$t('last execution status')"
-                                v-if="user.hasAny(permission.EXECUTION)"
                             >
                                 <template #default="scope">
                                     <status v-if="lastExecutionByFlowReady && getLastExecution(scope.row).lastStatus" :status="getLastExecution(scope.row).lastStatus" size="small" />
@@ -160,12 +172,11 @@
 
                             <el-table-column
                                 prop="state"
+                                v-if="displayColumn('state') && user.hasAny(permission.EXECUTION)"
                                 :label="$t('execution statistics')"
-                                v-if="user.hasAny(permission.EXECUTION)"
                                 class-name="row-graph"
                             >
                                 <template #default="scope">
-                                    <!-- TODO: Replace the usage of StateChart with one of the new chart components -->
                                     <state-chart
                                         :duration="true"
                                         :namespace="scope.row.namespace"
@@ -176,13 +187,22 @@
                                 </template>
                             </el-table-column>
 
-                            <el-table-column :label="$t('triggers')" class-name="row-action">
+                            <el-table-column 
+                                v-if="displayColumn('triggers')" 
+                                :label="$t('triggers')" 
+                                class-name="row-action"
+                            >
                                 <template #default="scope">
                                     <trigger-avatar :flow="scope.row" />
                                 </template>
                             </el-table-column>
 
-                            <el-table-column column-key="action" class-name="row-action">
+                            <el-table-column 
+                                v-if="displayColumn('action')"
+                                column-key="action" 
+                                class-name="row-action"
+                                :label="$t('actions')"
+                            >
                                 <template #default="scope">
                                     <router-link
                                         :to="{name: 'flows/update', params : {namespace: scope.row.namespace, id: scope.row.id}}"
@@ -266,6 +286,50 @@
         },
         data() {
             return {
+                optionalColumns: [
+                    {
+                        label: this.$t("id"),
+                        prop: "id",
+                        default: true
+                    },
+                    {
+                        label: this.$t("labels"),
+                        prop: "labels",
+                        default: true
+                    },
+                    {
+                        label: this.$t("namespace"),
+                        prop: "namespace",
+                        default: true
+                    },
+                    {
+                        label: this.$t("last execution date"),
+                        prop: "state.startDate",
+                        default: true,
+                    },
+                    {
+                        label: this.$t("last execution status"),
+                        prop: "state.current",
+                        default: true,
+                    },
+                    {
+                        label: this.$t("execution statistics"),
+                        prop: "state",
+                        default: true,
+                    },
+                    {
+                        label: this.$t("triggers"),
+                        prop: "triggers",
+                        default: true
+                    },
+                    {
+                        label: this.$t("actions"),
+                        prop: "action",
+                        default: true
+                    }
+                ],
+                displayColumns: [],
+                storageKey: storageKeys.DISPLAY_FLOWS_COLUMNS,
                 isDefaultNamespaceAllow: true,
                 permission: permission,
                 action: action,
@@ -326,6 +390,9 @@
                 vm.$router?.replace({query});
             });
         },
+        created() {
+            this.displayColumns = this.loadDisplayColumns();
+        },
         methods: {
             selectionMapper(element) {
                 return {
@@ -333,6 +400,24 @@
                     namespace: element.namespace,
                     enabled: !element.disabled
                 }
+            },
+            loadDisplayColumns() {
+                const storedColumns = localStorage.getItem(this.storageKey);
+                if (storedColumns) {
+                    return storedColumns.split(",");
+                }
+                return this.optionalColumns
+                    .filter(col => {
+                        return col.default && (!col.condition || col.condition());
+                    })
+                    .map(col => col.prop);
+            },
+            displayColumn(column) {
+                return this.hidden ? !this.hidden.includes(column) : this.displayColumns.includes(column);
+            },
+            updateDisplayColumns(newColumns) {
+                this.displayColumns = newColumns;
+                localStorage.setItem(this.storageKey, newColumns.join(","));
             },
             showStatChart() {
                 return this.daily && this.showChart;
