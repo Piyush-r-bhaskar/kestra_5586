@@ -421,17 +421,34 @@
     }
 
     .slider {
-        flex: 0 0 3px;
+        position: relative;
+        flex: 0 0 1px;
         border-radius: 0.15rem;
         margin: 0 4px;
-        background-color: var(--bs-border-color);
+        background-color: var(--ks-border-tertiary);
         border: none;
         cursor: col-resize;
-        user-select: none; /* disable selection */
-        padding: 0;
+        user-select: none;
+    
+        &::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3px;
+            height: 200px;
+            background-color: var(--ks-border-primary);
+            z-index: 1;
+            border-radius: 3px;
+        }
 
         &:hover {
-            background-color: var(--bs-secondary);
+            background-color: var(--ks-border-active);
+        
+        &::before {
+            background-color: var(--ks-border-active);
+            }
         }
     }
 
