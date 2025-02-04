@@ -23,7 +23,7 @@ import java.util.Map;
 
 @CommandLine.Command(
     name = "standalone",
-    description = "start a standalone server"
+    description = "Start the standalone all-in-one server"
 )
 @Slf4j
 public class StandAloneCommand extends AbstractServerCommand {

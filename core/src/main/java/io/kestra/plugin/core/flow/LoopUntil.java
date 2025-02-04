@@ -53,12 +53,12 @@ import java.util.stream.Stream;
             full = true,
             title = "Run a task until it returns a specific value. Note how you don't need to take care of incrementing the iteration count. The task will loop and keep track of the iteration outputs behind the scenes — you only need to specify the exit condition for the loop.",
             code = """
-                id: wait_for
+                id: loop_until
                 namespace: company.team
 
                 tasks:
                   - id: loop
-                    type: io.kestra.plugin.core.flow.WaitFor
+                    type: io.kestra.plugin.core.flow.LoopUntil
                     condition: "{{ outputs.return.value == '4' }}"
                     tasks:
                       - id: return
@@ -66,9 +66,10 @@ import java.util.stream.Stream;
                         format: "{{ outputs.loop.iterationCount }}"
                 """
         )
-    }
+    },
+    aliases = "io.kestra.plugin.core.flow.WaitFor"
 )
-public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
+public class LoopUntil extends Task implements FlowableTask<LoopUntil.Output> {
     private static final int INITIAL_LOOP_VALUE = 1;
 
     @Valid
@@ -232,17 +233,17 @@ public class WaitFor extends Task implements FlowableTask<WaitFor.Output> {
 
     @SuppressWarnings("unchecked")
     @Override
-    public WaitFor.Output outputs(RunContext runContext) throws IllegalVariableEvaluationException {
+    public LoopUntil.Output outputs(RunContext runContext) throws IllegalVariableEvaluationException {
        Map<String, Object> outputs = (Map<String, Object>) runContext.getVariables().get("outputs");
         if (outputs != null && outputs.get(this.id) != null) {
             return Output.builder().iterationCount((Integer) ((Map<String, Object>) outputs.get(this.id)).get("iterationCount")).build();
         }
-        return WaitFor.Output.builder()
+        return LoopUntil.Output.builder()
             .iterationCount(INITIAL_LOOP_VALUE)
             .build();
     }
 
-    public WaitFor.Output outputs(TaskRun parentTaskRun) throws IllegalVariableEvaluationException {
+    public LoopUntil.Output outputs(TaskRun parentTaskRun) throws IllegalVariableEvaluationException {
         String value = parentTaskRun != null ?
             String.valueOf(Optional.ofNullable(parentTaskRun.getOutputs())
                 .map(outputs -> outputs.get("iterationCount"))

@@ -1,7 +1,9 @@
 <template>
     <el-dropdown trigger="click" placement="bottom-end">
-        <KestraIcon :tooltip="$t('dashboards')" placement="bottom">
-            <el-button :icon="ViewDashboardEdit" />
+        <KestraIcon placement="bottom">
+            <el-button :icon="Menu" class="main-button">
+                <span class="text-truncate">{{ selectedDashboard ?? $t('default_dashboard') }}</span>
+            </el-button>
         </KestraIcon>
 
         <template #dropdown>
@@ -26,7 +28,7 @@
                 />
 
                 <el-dropdown-item
-                    @click="emits('dashboard')"
+                    @click="selectDashboard(null)"
                     :class="{'mt-3': filtered.length < 10}"
                 >
                     <small>{{ t("default_dashboard") }}</small>
@@ -38,14 +40,18 @@
                     <el-dropdown-item
                         v-for="(dashboard, index) in filtered"
                         :key="index"
-                        @click="emits('dashboard', dashboard)"
+                        @click="selectDashboard(dashboard)"
                     >
                         <div class="d-flex align-items-center w-100">
                             <div class="col text-truncate">
                                 <small>{{ dashboard.title }}</small>
                             </div>
 
-                            <div class="col-auto">
+                            <div class="col-auto mt-1">
+                                <Pencil
+                                    @click.stop="editDashboard(dashboard)"
+                                    class="mx-2"
+                                />
                                 <DeleteOutline
                                     @click.stop="remove(dashboard)"
                                 />
@@ -67,13 +73,14 @@
 <script setup lang="ts">
     import {onBeforeMount, ref, computed, getCurrentInstance} from "vue";
     import KestraIcon from "../../Kicon.vue";
-    import {ViewDashboardEdit, Plus, DeleteOutline, Magnify,} from "../utils/icons";
+    import {Menu, Plus, DeleteOutline, Magnify, Pencil} from "../utils/icons";
     import {useI18n} from "vue-i18n";
     import {useStore} from "vuex";
-    import {useRouter} from "vue-router";
+    import {useRouter, useRoute} from "vue-router";
 
     const {t} = useI18n({useScope: "global"});
     const store = useStore();
+    const route = useRoute();
     const router = useRouter();
     const emits = defineEmits(["dashboard"]);
     const toast = getCurrentInstance().appContext.config.globalProperties.$toast();
@@ -98,11 +105,28 @@
         );
     });
 
+    const selectedDashboard = ref(null)
+
+    const selectDashboard = (dashboard: any) => {
+        selectedDashboard.value = dashboard?.title;
+        emits("dashboard", dashboard)
+    }
+
+    const editDashboard = (dashboard: any) => {
+        router.push({name: "dashboards/update", params: {id: dashboard.id}});
+    }
+
     onBeforeMount(() => {
         store
             .dispatch("dashboard/list", {})
             .then((response: { results: { id: string; title: string }[] }) => {
                 dashboards.value = response.results;
+                if (route.params?.id) {
+                    const dashboard = dashboards.value.find(d => d.id === route.params.id);
+                    if (dashboard) {
+                        selectedDashboard.value = dashboard.title;
+                    }
+                }
             });
     });
 </script>
@@ -116,5 +140,13 @@
 
 .items {
     max-height: 160px !important; // 5 visible items
+}
+
+.main-button {
+    max-width: 300px;
+
+    span {
+        max-width: 250px;
+    }
 }
 </style>

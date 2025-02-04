@@ -40,7 +40,7 @@
             const schema = this.schemaOptions.find((item) =>
                 typeof this.modelValue === "string"
                     ? item.id === "string"
-                    : item.id === this.modelValue.type,
+                    : item.id === this.modelValue?.type,
             );
 
             this.onSelect(schema?.value);

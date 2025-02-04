@@ -10,7 +10,7 @@ export const manualChunks = {
     "dashboard": [
         "src/components/dashboard/Dashboard.vue", 
         "src/components/dashboard/components/DashboardCreate.vue", 
-        "src/components/dashboard/components/DashboardEdit.vue"
+        "src/override/components/dashboard/components/DashboardEdit.vue"
     ],
     // bundle flows and all its dependencies in a second chunk
     "flows": [

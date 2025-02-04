@@ -10,9 +10,9 @@
 </template>
 
 <script>
-    import RouteContext from "../../../mixins/routeContext";
-    import TopNavBar from "../../../components/layout/TopNavBar.vue";
-    import DashboardEditor from "./DashboardEditor.vue";
+    import RouteContext from "../../../../mixins/routeContext.js";
+    import TopNavBar from "../../../../components/layout/TopNavBar.vue";
+    import DashboardEditor from "../../../../components/dashboard/components/DashboardEditor.vue";
 
     export default {
         mixins: [RouteContext],

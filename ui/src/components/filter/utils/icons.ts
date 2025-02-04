@@ -22,6 +22,8 @@ import ViewDashboardEdit from "vue-material-design-icons/ViewDashboardEdit.vue";
 import TableColumn from "vue-material-design-icons/TableColumnPlusAfter.vue";
 import Eye from "vue-material-design-icons/Eye.vue";
 import EyeOff from "vue-material-design-icons/EyeOff.vue";
+import Pencil from "vue-material-design-icons/Pencil.vue";
+import Menu from "vue-material-design-icons/Menu.vue";
 
 export {
     AccountCheck,
@@ -48,4 +50,6 @@ export {
     TableColumn,
     Eye,
     EyeOff,
+    Pencil,
+    Menu
 };

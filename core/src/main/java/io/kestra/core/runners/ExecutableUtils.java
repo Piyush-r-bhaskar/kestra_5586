@@ -15,6 +15,7 @@ import io.kestra.core.repositories.ExecutionRepositoryInterface;
 import io.kestra.core.services.ExecutionService;
 import io.kestra.core.storages.Storage;
 import io.kestra.core.trace.TracerFactory;
+import io.kestra.core.utils.ListUtils;
 import io.kestra.core.utils.MapUtils;
 import io.kestra.core.trace.propagation.ExecutionTextMapSetter;
 import io.opentelemetry.api.OpenTelemetry;
@@ -153,7 +154,7 @@ public final class ExecutableUtils {
                 throw new IllegalStateException("Cannot execute an invalid flow: " + fwe.getException());
             }
 
-            List<Label> newLabels = inheritLabels ? new ArrayList<>(currentExecution.getLabels()) : new ArrayList<>(systemLabels(currentExecution));
+            List<Label> newLabels = inheritLabels ? new ArrayList<>(filterLabels(currentExecution.getLabels(), flow)) : new ArrayList<>(systemLabels(currentExecution));
             if (labels != null) {
                 labels.forEach(throwConsumer(label -> newLabels.add(new Label(runContext.render(label.key()), runContext.render(label.value())))));
             }
@@ -163,8 +164,12 @@ public final class ExecutableUtils {
                 "namespace", currentFlow.getNamespace(),
                 "flowId", currentFlow.getId(),
                 "flowRevision", currentFlow.getRevision(),
-                "taskRunId", currentTaskRun.getId()
+                "taskRunId", currentTaskRun.getId(),
+                "taskId", currentTaskRun.getTaskId()
             ));
+            if (currentTaskRun.getOutputs() != null) {
+                variables.put("taskRunOutputs", currentTaskRun.getOutputs());
+            }
             if (currentTaskRun.getValue() != null) {
                 variables.put("taskRunValue", currentTaskRun.getValue());
             }
@@ -195,6 +200,16 @@ public final class ExecutableUtils {
                 .execution(execution)
                 .build());
         }));
+    }
+
+    private static List<Label> filterLabels(List<Label> labels, Flow flow) {
+        if (ListUtils.isEmpty(flow.getLabels())) {
+            return labels;
+        }
+        
+        return labels.stream()
+            .filter(label -> flow.getLabels().stream().noneMatch(flowLabel -> flowLabel.key().equals(label.key())))
+            .toList();
     }
 
     private static List<Label> systemLabels(Execution execution) {
@@ -277,5 +292,28 @@ public final class ExecutableUtils {
             return State.Type.WARNING;
         }
         return State.Type.SUCCESS;
+    }
+
+    public static SubflowExecutionResult subflowExecutionResultFromChildExecution(RunContext runContext, Flow flow, Execution execution, ExecutableTask<?> executableTask, TaskRun taskRun) {
+        try {
+            return executableTask
+                .createSubflowExecutionResult(runContext, taskRun, flow, execution)
+                .orElse(null);
+        } catch (Exception e) {
+            log.error("Unable to create the Subflow Execution Result", e);
+            // we return a fail subflow execution result to end the flow
+            return SubflowExecutionResult.builder()
+                .executionId(execution.getId())
+                .state(State.Type.FAILED)
+                .parentTaskRun(taskRun.withState(State.Type.FAILED).withAttempts(List.of(TaskRunAttempt.builder().state(new State().withState(State.Type.FAILED)).build())))
+                .build();
+        }
+    }
+
+    public static boolean isSubflow(Execution execution) {
+        return execution.getTrigger() != null && (
+            "io.kestra.plugin.core.flow.Subflow".equals(execution.getTrigger().getType()) ||
+                "io.kestra.plugin.core.flow.ForEachItem$ForEachItemExecutable".equals(execution.getTrigger().getType())
+        );
     }
 }

@@ -7,22 +7,21 @@
             :key="index"
             :gutter="10"
         >
-            <el-col :span="6">
+            <el-col :span="8">
                 <InputText
                     :model-value="key"
                     :placeholder="t('key')"
                     @update:model-value="(changed) => updateKey(key, changed)"
                 />
             </el-col>
-            <el-col :span="16">
+            <el-col :span="16" class="d-flex">
                 <InputText
                     :model-value="value"
                     :placeholder="t('value')"
                     @update:model-value="(changed) => updateValue(key, changed)"
+                    class="w-100 me-2"
                 />
-            </el-col>
-            <el-col :span="2" class="col align-self-center delete">
-                <DeleteOutline @click="removePair(key)" />
+                <DeleteOutline @click="removePair(key)" class="delete" />
             </el-col>
         </el-row>
 
