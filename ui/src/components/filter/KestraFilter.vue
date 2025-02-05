@@ -10,7 +10,7 @@
             default-first-option
             allow-create
             filterable
-            :filter-method="(f) => prefixFilter = f.toLowerCase()"
+            :filter-method="(f) => (prefixFilter = f.toLowerCase())"
             clearable
             multiple
             placement="bottom"
@@ -62,7 +62,8 @@
             </template>
             <template v-else-if="dropdowns.second.shown">
                 <el-option
-                    v-for="(comparator, index) in dropdowns.first.value.comparators"
+                    v-for="(comparator, index) in dropdowns.first.value
+                        .comparators"
                     :key="comparator.value"
                     :value="comparator"
                     :label="comparator.label"
@@ -81,9 +82,11 @@
                     :key="filter.value"
                     :value="filter"
                     :class="{
-                        selected: currentFilters.at(-1)?.value?.includes(filter.value),
+                        selected: currentFilters
+                            .at(-1)
+                            ?.value?.includes(filter.value),
                         disabled: isOptionDisabled(filter),
-                        'level-3': true
+                        'level-3': true,
                     }"
                     @click="
                         () => !isOptionDisabled(filter) && valueCallback(filter)
@@ -91,7 +94,10 @@
                     :data-test-id="`KestraFilter__value__${index}`"
                 >
                     <template v-if="filter.label.component">
-                        <component :is="filter.label.component" v-bind="filter.label.props" />
+                        <component
+                            :is="filter.label.component"
+                            v-bind="filter.label.props"
+                        />
                     </template>
                     <template v-else>
                         {{ filter.label }}
@@ -117,7 +123,11 @@
                     class="rounded-0"
                 />
             </KestraIcon>
-            <Save :disabled="!currentFilters.length" :prefix="ITEMS_PREFIX" :current="currentFilters" />
+            <Save
+                :disabled="!currentFilters.length"
+                :prefix="ITEMS_PREFIX"
+                :current="currentFilters"
+            />
         </el-button-group>
 
         <el-button-group
@@ -159,7 +169,7 @@
     import {computed, nextTick, onMounted, ref, shallowRef, watch} from "vue";
     import {ElSelect} from "element-plus";
 
-    import {Shown, Buttons, CurrentItem, Property} from "./utils/types";
+    import {Buttons, CurrentItem, Shown, Pair, Property} from "./utils/types";
 
     import Refresh from "../layout/RefreshButton.vue";
     import Items from "./segments/Items.vue";
@@ -170,7 +180,7 @@
     import Properties from  "./segments/Properties.vue";
     import KestraIcon from "../Kicon.vue";
     import DateRange from "../layout/DateRange.vue";
-    import Status from "../../components/Status.vue";
+    import Status from "./components/Status.vue";
 
     import {Magnify} from "./utils/icons";
 
@@ -227,15 +237,17 @@
         if (prefixFilter.value === "") {
             return valueOptions.value;
         }
-        return valueOptions.value.filter(o => o.label.toLowerCase().startsWith(prefixFilter.value));
-    })
+        return valueOptions.value.filter((o) =>
+            o.label.toLowerCase().startsWith(prefixFilter.value),
+        );
+    });
 
     const select = ref<InstanceType<typeof ElSelect> | null>(null);
     const updateHoveringIndex = (index) => {
         select.value!.states.hoveringIndex = undefined;
         nextTick(() => {
             select.value!.states.hoveringIndex = Math.max(index, 0);
-        })
+        });
     };
     const emptyLabel = ref(t("filters.empty"));
     const INITIAL_DROPDOWNS = {
@@ -297,7 +309,7 @@
     const activeParentFilter = ref<string | null>(null);
     const lastClickedParent = ref<string | null>(null);
     const showSubFilterDropdown = ref(false);
-    const valueOptions = ref([]);
+    const valueOptions = ref<Pair[]>([]);
     const parentValue = ref<string | null>(null);
 
     const filterCallback = (option) => {
@@ -330,7 +342,10 @@
         } else {
             // If it doesn't exist, push new filter
             dropdowns.value.first = {shown: false, value: option};
-            dropdowns.value.second = {shown: true, index: currentFilters.value.length};
+            dropdowns.value.second = {
+                shown: true,
+                index: currentFilters.value.length,
+            };
             currentFilters.value.push(option.value);
             activeParentFilter.value = option.value.label;
             lastClickedParent.value = option.value.label;
@@ -366,7 +381,8 @@
             lastClickedParent.value = null;
             showSubFilterDropdown.value = false;
             // If last filter item selection was not completed, remove it from array
-            if (currentFilters.value?.at(-1)?.value?.length === 0) currentFilters.value.pop();
+            if (currentFilters.value?.at(-1)?.value?.length === 0)
+                currentFilters.value.pop();
         } else {
             updateHoveringIndex(0);
         }
@@ -387,7 +403,11 @@
                 (item) => item.label === parentValue.value,
             );
             if (parentIndex !== -1) {
-                if (["namespace", "log level"].includes(lastClickedParent.value.toLowerCase())) {
+                if (
+                    ["namespace", "log level"].includes(
+                        lastClickedParent.value.toLowerCase(),
+                    )
+                ) {
                     const values = currentFilters.value[parentIndex].value;
                     const index = values.indexOf(filter.value);
 
@@ -406,7 +426,9 @@
                 }
             }
         } else {
-            const match = currentFilters.value.find((v) => v.label === "absolute_date");
+            const match = currentFilters.value.find(
+                (v) => v.label === "absolute_date",
+            );
             if (match) {
                 match.value = [
                     {
@@ -417,7 +439,9 @@
             }
         }
 
-        if (!currentFilters.value[dropdowns.value.third.index].comparator?.multiple) {
+        if (
+            !currentFilters.value[dropdowns.value.third.index].comparator?.multiple
+        ) {
             // If selection is not multiple, close the dropdown
             closeDropdown();
         }
@@ -478,18 +502,15 @@
             break;
 
         case "state":
-            valueOptions.value = (props.values?.state || VALUES.EXECUTION_STATES).
-                map(value => {
-                    value.label = {
-                        "component": shallowRef(Status),
-                        "props": {
-                            "class": "justify-content-center",
-                            "status": value.value,
-                            "size": "small"
-                        }
-                    }
-                    return value;
-                });
+            valueOptions.value = (
+                props.values?.state || VALUES.EXECUTION_STATES
+            ).map((value) => {
+                value.label = {
+                    component: shallowRef(Status),
+                    props: {status: value.value},
+                };
+                return value;
+            });
             break;
 
         case "trigger_state":
@@ -569,12 +590,17 @@
 
         return OPTIONS.filter((o) => {
             const label = o.value?.label;
-            return props.include.includes(label) && label !== exclude && label.startsWith(prefixFilter.value);
+            return (
+                props.include.includes(label) &&
+                label !== exclude &&
+                label.startsWith(prefixFilter.value)
+            );
         });
     });
 
     const changeCallback = (wholeSearchContent) => {
-        if (!Array.isArray(wholeSearchContent) || !wholeSearchContent.length) return;
+        if (!Array.isArray(wholeSearchContent) || !wholeSearchContent.length)
+            return;
 
         if (typeof wholeSearchContent.at(-1) === "string") {
             if (
@@ -587,10 +613,17 @@
             } else {
                 // Adding text search string
                 const label = t("filters.options.text");
-                const index = currentFilters.value.findIndex((i) => i.label === label);
+                const index = currentFilters.value.findIndex(
+                    (i) => i.label === label,
+                );
 
-                if (index !== -1) currentFilters.value[index].value = [wholeSearchContent.at(-1)];
-                else currentFilters.value.push({label, value: [wholeSearchContent.at(-1)]});
+                if (index !== -1)
+                    currentFilters.value[index].value = [wholeSearchContent.at(-1)];
+                else
+                    currentFilters.value.push({
+                        label,
+                        value: [wholeSearchContent.at(-1)],
+                    });
             }
 
             triggerSearch();
@@ -776,7 +809,10 @@
                                 .replace(/\blog\b/gi, "")
                                 .trim()
                                 .replace(/\s+/g, "_"); // Set parentValue when a filter is clicked
-                            if (!currentFilters.value[existingFilterIndex].comparator) {
+                            if (
+                                !currentFilters.value[existingFilterIndex]
+                                    .comparator
+                            ) {
                                 dropdowns.value = {
                                     first: {shown: false, value: {}},
                                     second: {
