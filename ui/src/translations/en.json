@@ -1164,11 +1164,10 @@
       }
     },
     "properties": {
-      "button": "Properties",
-      "searchPlaceholder": "Search for a property...",
-      "shownInTable": "Shown in Table",
-      "hiddenInTable": "Hidden in Table",
-      "select": "Choose Table Columns"
+      "label": "Properties",
+      "hint": "Choose Visible Columns",
+      "shown": "Shown in Table",
+      "hidden": "Hidden in Table"
     },
     "editor_shortcuts": {
       "label": "Keyboard shortcuts",
@@ -1183,7 +1182,7 @@
     },
     "instance": "Instance",
     "something_went_wrong": {
-        "loading_execution": "Something went wrong while loading the execution"
+      "loading_execution": "Something went wrong while loading the execution"
     }
   }
 }

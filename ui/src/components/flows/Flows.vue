@@ -178,10 +178,6 @@
                                 class-name="row-graph"
                             >
                                 <template #default="scope">
-                                    <state-chart
-                                        :duration="true"
-                                        :namespace="scope.row.namespace"
-                                        :flow-id="scope.row.id"
                                     <ExecutionsBarChart
                                         v-if="dailyGroupByFlowReady"
                                         class="stats-chart"

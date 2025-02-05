@@ -1,8 +1,8 @@
 <template>
     <div class="properties-wrapper">
-        <KestraIcon :tooltip="$t('properties.select')" placement="bottom">
+        <KestraIcon :tooltip="$t('properties.hint')" placement="bottom">
             <el-button :icon="TableColumn" @click.stop="toggleContainer">
-                {{ $t("properties.button") }}
+                {{ $t("properties.label") }}
             </el-button>
         </KestraIcon>
 
@@ -14,14 +14,14 @@
         >
             <el-input
                 v-model="searchQuery"
-                :placeholder="$t('properties.searchPlaceholder')"
+                :placeholder="$t('search')"
                 :prefix-icon="Magnify"
                 class="rounded-2 w-100 mb-2"
             />
             <div class="pe-2 scrollable-container">
                 <div class="mt-2 shown-group" v-if="shownProperties.length > 0">
                     <div class="text-start mb-1 group-title">
-                        {{ $t("properties.shownInTable") }}
+                        {{ $t("properties.shown") }}
                     </div>
                     <ul class="property-list list-style-none m-0 p-0" id="shown-list">
                         <li v-for="property in filteredShownProperties" :key="property">
@@ -35,7 +35,7 @@
                 <el-divider v-if="filteredHiddenProperties.length > 0" />
                 <div class="hidden-group">
                     <div class="text-start mb-1 group-title" id="hidden-title" v-if="hiddenProperties.length > 0">
-                        {{ $t("properties.hiddenInTable") }}
+                        {{ $t("properties.hidden") }}
                     </div>
                     <ul class="property-list list-style-none m-0 p-0" id="hidden-list">
                         <li v-for="property in filteredHiddenProperties" :key="property">
