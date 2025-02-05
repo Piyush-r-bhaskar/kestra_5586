@@ -27,7 +27,7 @@
                 refresh: buttons.refresh.shown,
                 settings: buttons.settings.shown,
                 dashboards: dashboards.shown,
-                properties: properties.shown
+                properties: properties.shown,
             }"
             @focus="handleFocus"
             data-test-id="KestraFilter__select"
@@ -112,7 +112,7 @@
                 'me-1':
                     buttons.refresh.shown ||
                     buttons.settings.shown ||
-                    dashboards.shown || 
+                    dashboards.shown ||
                     properties.shown,
             }"
         >
@@ -133,10 +133,7 @@
         <el-button-group
             v-if="buttons.refresh.shown || buttons.settings.shown"
             class="d-inline-flex ms-1"
-            :class="{'me-1': 
-                dashboards.shown || 
-                properties.shown
-            }"
+            :class="{'me-1': dashboards.shown || properties.shown}"
         >
             <Refresh
                 v-if="buttons.refresh.shown"
@@ -159,7 +156,7 @@
             :columns="properties.columns"
             :model-value="properties.displayColumns"
             :storage-key="properties.storageKey"
-            @update:model-value="(col) => emits('update:properties', col)"
+            @update-properties="(v) => emits('updateProperties', v)"
             class="ms-1"
         />
     </section>
@@ -177,7 +174,7 @@
     import Save from "./segments/Save.vue";
     import Settings from "./segments/Settings.vue";
     import Dashboards from "./segments/Dashboards.vue";
-    import Properties from  "./segments/Properties.vue";
+    import Properties from "./segments/Properties.vue";
     import KestraIcon from "../Kicon.vue";
     import DateRange from "../layout/DateRange.vue";
     import Status from "./components/Status.vue";
@@ -200,7 +197,7 @@
     const router = useRouter();
     const route = useRoute();
 
-    const emits = defineEmits(["dashboard", "input", "update:properties"]);
+    const emits = defineEmits(["dashboard", "input", "updateProperties"]);
     const props = defineProps({
         prefix: {type: String, default: undefined},
         include: {type: Array, default: () => []},
@@ -223,7 +220,7 @@
         },
         properties: {
             type: Object as () => Property,
-            default: () => ({shown: false})
+            default: () => ({shown: false}),
         },
         placeholder: {type: String, default: undefined},
         searchCallback: {type: Function, default: undefined},
@@ -858,7 +855,6 @@ $settins: 52px;
 $dashboards: 52px;
 $properties: v-bind('props.propertiesWidth + "px"');
 
-
 .filters {
     @include width-available;
 
@@ -867,7 +863,8 @@ $properties: v-bind('props.propertiesWidth + "px"');
 
         &.refresh.settings.dashboards.properties {
             max-width: calc(
-                100% - $included - $refresh - $settins - $dashboards - #{$properties}
+                100% - $included - $refresh - $settins - $dashboards -
+                    #{$properties}
             );
         }
 

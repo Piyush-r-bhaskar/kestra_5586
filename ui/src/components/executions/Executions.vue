@@ -50,10 +50,10 @@
                     :properties="{
                         shown: true,
                         columns: optionalColumns,
-                        displayColumns: displayColumns,
-                        storageKey: storageKey
+                        displayColumns,
+                        storageKey: 'executions'
                     }"
-                    @update:properties="updateDisplayColumns"
+                    @update-properties="updateDisplayColumns"
                 />
             </template>
 
@@ -475,11 +475,6 @@
                 showChart: ["true", null].includes(localStorage.getItem(storageKeys.SHOW_CHART)),
                 optionalColumns: [
                     {
-                        label: this.$t("id"),
-                        prop: "id",
-                        default: true
-                    },
-                    {
                         label: this.$t("start date"),
                         prop: "state.startDate",
                         default: true
@@ -667,7 +662,6 @@
             },
             updateDisplayColumns(newColumns) {
                 this.displayColumns = newColumns;
-                localStorage.setItem(this.storageKey, newColumns.join(","));
             },
             onShowChartChange(value) {
                 this.showChart = value;

@@ -6,7 +6,7 @@
             </el-button>
         </KestraIcon>
 
-        <div 
+        <div
             ref="containerRef"
             class="properties-container mt-2"
             :class="{visible: showContainer}"
@@ -23,10 +23,21 @@
                     <div class="text-start mb-1 group-title">
                         {{ $t("properties.shown") }}
                     </div>
-                    <ul class="property-list list-style-none m-0 p-0" id="shown-list">
-                        <li v-for="property in filteredShownProperties" :key="property">
-                            <span class="property-name fw-bold">{{ getColumnLabel(property) }}</span>
-                            <div class="eye-icon" @click="toggleProperty(property, true)">
+                    <ul
+                        class="property-list list-style-none m-0 p-0"
+                        id="shown-list"
+                    >
+                        <li
+                            v-for="property in filteredShownProperties"
+                            :key="property"
+                        >
+                            <span class="property-name">{{
+                                getColumnLabel(property)
+                            }}</span>
+                            <div
+                                class="eye-icon"
+                                @click="toggleProperty(property, true)"
+                            >
                                 <Eye />
                             </div>
                         </li>
@@ -34,13 +45,28 @@
                 </div>
                 <el-divider v-if="filteredHiddenProperties.length > 0" />
                 <div class="hidden-group">
-                    <div class="text-start mb-1 group-title" id="hidden-title" v-if="hiddenProperties.length > 0">
+                    <div
+                        class="text-start mb-1 group-title"
+                        id="hidden-title"
+                        v-if="hiddenProperties.length > 0"
+                    >
                         {{ $t("properties.hidden") }}
                     </div>
-                    <ul class="property-list list-style-none m-0 p-0" id="hidden-list">
-                        <li v-for="property in filteredHiddenProperties" :key="property">
-                            <span class="property-name fw-bold">{{ getColumnLabel(property) }}</span>
-                            <div class="eye-icon hidden" @click="toggleProperty(property, false)">
+                    <ul
+                        class="property-list list-style-none m-0 p-0"
+                        id="hidden-list"
+                    >
+                        <li
+                            v-for="property in filteredHiddenProperties"
+                            :key="property"
+                        >
+                            <span class="property-name fw-bold">{{
+                                getColumnLabel(property)
+                            }}</span>
+                            <div
+                                class="eye-icon hidden"
+                                @click="toggleProperty(property, false)"
+                            >
                                 <EyeOff />
                             </div>
                         </li>
@@ -59,10 +85,10 @@
     const props = defineProps({
         columns: {type: Array, required: true},
         modelValue: {type: Array, required: true},
-        storageKey: {type: String, required: true, default: "default-storage-key"}
+        storageKey: {type: String, required: true},
     });
 
-    const emit = defineEmits(["update:modelValue"]);
+    const emit = defineEmits(["updateProperties"]);
     const containerRef = ref(null);
     const showContainer = ref(false);
     const searchQuery = ref("");
@@ -77,8 +103,10 @@
     onUnmounted(() => document.removeEventListener("click", handleClickOutside));
 
     const shownProperties = computed(() => props.modelValue);
-    const hiddenProperties = computed(() => 
-        props.columns.map(col => col.prop).filter(prop => !shownProperties.value.includes(prop))
+    const hiddenProperties = computed(() =>
+        props.columns
+            .map((col) => col.prop)
+            .filter((prop) => !shownProperties.value.includes(prop)),
     );
 
     const toggleContainer = () => {
@@ -86,37 +114,39 @@
     };
 
     const toggleProperty = (prop, isShown) => {
-        const newValue = isShown 
-            ? shownProperties.value.filter(p => p !== prop) 
+        const newValue = isShown
+            ? shownProperties.value.filter((p) => p !== prop)
             : [...shownProperties.value, prop];
 
-        localStorage.setItem(props.storageKey, newValue.join(","));
-        emit("update:modelValue", newValue);
+        localStorage.setItem(`columns_${props.storageKey}`, newValue.join(","));
+        emit("updateProperties", newValue);
     };
 
     const getColumnLabel = (prop) => {
-        const column = props.columns.find(col => col.prop === prop);
+        const column = props.columns.find((col) => col.prop === prop);
         return column ? column.label : prop;
     };
     // Column list based on order defined in Table
     const filteredShownProperties = computed(() => {
         const query = searchQuery.value.toLowerCase();
         return props.columns
-            .filter(col => 
-                shownProperties.value.includes(col.prop) && 
-                getColumnLabel(col.prop).toLowerCase().includes(query)
+            .filter(
+                (col) =>
+                    shownProperties.value.includes(col.prop) &&
+                    getColumnLabel(col.prop).toLowerCase().includes(query),
             )
-            .map(col => col.prop);
+            .map((col) => col.prop);
     });
 
     const filteredHiddenProperties = computed(() => {
         const query = searchQuery.value.toLowerCase();
         return props.columns
-            .filter(col => 
-                hiddenProperties.value.includes(col.prop) && 
-                getColumnLabel(col.prop).toLowerCase().includes(query)
+            .filter(
+                (col) =>
+                    hiddenProperties.value.includes(col.prop) &&
+                    getColumnLabel(col.prop).toLowerCase().includes(query),
             )
-            .map(col => col.prop);
+            .map((col) => col.prop);
     });
 </script>
 
@@ -140,7 +170,10 @@
     right: 0;
     margin-bottom: 7px;
     transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        transform 0.3s ease,
+        visibility 0.3s ease;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 
     &.visible {
@@ -187,7 +220,7 @@
 }
 
 .property-list {
-    li {  
+    li {
         padding: 8px 0;
         display: flex;
         justify-content: space-between;
@@ -218,7 +251,7 @@
 
     &.hidden {
         color: var(--el-text-color-secondary);
-        
+
         &:hover {
             color: var(--el-text-color-regular);
         }
