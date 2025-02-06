@@ -1,5 +1,6 @@
 <template>
     <span data-component="FILENAME_PLACEHOLDER" v-if="labels">
+        <!-- 'el-check-tag' would be a better fit but it currently lacks customization -->
         <el-tag
             v-for="(value, key) in labelMap"
             :key="key"
@@ -29,6 +30,8 @@
                 default: true
             }
         },
+        // this is needed as flows uses a Map and Execution a List of Labels.
+        // if we align both of them this can be removed
         computed: {
             labelMap() {
                 if (Array.isArray(this.labels)) {
