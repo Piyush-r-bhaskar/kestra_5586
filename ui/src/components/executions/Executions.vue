@@ -632,8 +632,11 @@
             filteredLabels(labels) {
                 const toIgnore = this.configs.hiddenLabelsPrefixes || [];
 
-                // Extract only the keys from the route query labels
-                const allowedLabels = this.$route.query.labels ? this.$route.query.labels.map(label => label.split(":")[0]) : [];
+                const allowedLabels = Array.isArray(this.$route.query.labels)
+                    ? this.$route.query.labels.map(label => label.split(":")[0])
+                    : typeof this.$route.query.labels === "string"
+                        ? this.$route.query.labels.split(",").map(label => label.split(":")[0])
+                        : [];
 
                 return labels?.filter(label => {
                     // Check if the label key matches any prefix but allow it if it's in the query

@@ -846,6 +846,29 @@
             });
         }
     });
+
+    // Adding labels from url
+    const updateLabelsFilters = () => {
+        const labels = route.query.labels;
+
+        if (labels) {
+            const labelsArray = Array.isArray(labels) ? labels : [labels];
+            const newLabelsFilters = labelsArray.map(label => {
+                const [key, value] = label.split(":");
+                return {
+                    label: "labels",
+                    value: `${key.trim()}: ${value.trim()}`,
+                };
+            });
+
+            currentFilters.value = currentFilters.value.filter(filter => filter.label !== "labels").concat(newLabelsFilters);
+        } else {
+            currentFilters.value = currentFilters.value.filter(filter => filter.label !== "labels");
+        }
+    };
+
+    watch(() => route.query.labels, updateLabelsFilters);
+    onMounted(updateLabelsFilters);
 </script>
 
 <style lang="scss">

@@ -1,6 +1,5 @@
 <template>
     <span data-component="FILENAME_PLACEHOLDER" v-if="labels">
-        <!-- 'el-check-tag' would be a better fit but it currently lacks customization -->
         <el-tag
             v-for="(value, key) in labelMap"
             :key="key"
@@ -8,6 +7,7 @@
             class="me-1 labels"
             size="small"
             disable-transitions
+            @click="onClicked({key, value})"
         >
             <router-link v-if="filterEnabled" :to="link(key, value)">
                 {{ key }}: {{ value }}
@@ -29,8 +29,6 @@
                 default: true
             }
         },
-        // this is needed as flows uses a Map and Execution a List of Labels.
-        // if we align both of them this can be removed
         computed: {
             labelMap() {
                 if (Array.isArray(this.labels)) {
@@ -55,7 +53,7 @@
                         }
 
                         labels.set(label.slice(0, separatorIndex), label.slice(separatorIndex + 1));
-                    })
+                    });
 
                 return labels;
             },
@@ -79,6 +77,18 @@
                 delete qs.page;
 
                 return {name: this.$route.name, params: this.$route.params, query: qs};
+            },
+            onClicked({key, value}) {
+                const currentQuery = {...this.$route.query};
+                const labels = currentQuery.labels ? currentQuery.labels.split(",") : [];
+
+                const labelIndex = labels.findIndex(label => label.startsWith(`${key}:`));
+                if (labelIndex !== -1) {
+                    labels.splice(labelIndex, 1);
+                } else {
+                    labels.push(`${key}:${value}`);
+                }
+                this.$router.push({query: {...currentQuery, labels: labels.join(",")}});
             }
         }
     };
