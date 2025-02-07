@@ -37,7 +37,7 @@
             }
         },
         methods: {
-            getLabelsFromQuery() {
+            labelsFromQuery() {
                 const labels = new Map();
                 (this.$route.query.labels !== undefined ?
                     (typeof(this.$route.query.labels) === "string" ? [this.$route.query.labels] : this.$route.query.labels)  :
@@ -56,11 +56,11 @@
                 return labels;
             },
             checked(key, value) {
-                return this.getLabelsFromQuery().has(key) && this.getLabelsFromQuery().get(key) === value;
+                return this.labelsFromQuery().has(key) && this.labelsFromQuery().get(key) === value;
                 
             },
             link(key, value) {
-                const labels = this.getLabelsFromQuery();
+                const labels = this.labelsFromQuery();
 
                 if (labels.has(key)) {
                     labels.delete(key);
