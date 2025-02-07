@@ -17,14 +17,19 @@
 
             <div class="switch-container">
                 <div
-                    class="d-flex justify-content-end align-items-center switch-content"
+                    class="d-flex justify-content-end align-items-center"
                 >
-                    <span class="pe-2 fw-light small">{{ t("duration") }}</span>
-                    <el-switch
-                        v-model="duration"
-                        :active-icon="CheckIcon"
-                        inline-prompt
-                    />
+                    <span 
+                        class="fw-light small"
+                    >
+                        {{ t("duration") }}
+                        <el-switch
+                            v-model="duration"
+                            :active-icon="CheckIcon"
+                            inline-prompt
+                            class="ps-3"
+                        />
+                    </span>
                 </div>
                 <div id="executions" />
             </div>
@@ -117,9 +122,8 @@ $height: 200px;
         width: 100%;
     }
 
-    .switch-content {
-        justify-content: center;
-    }
+    
+
 
     .fs-2 {
         font-size: 1.5rem;
