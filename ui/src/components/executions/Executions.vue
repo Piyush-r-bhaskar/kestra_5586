@@ -643,11 +643,6 @@
                     return !toIgnore.some(prefix => label.key.startsWith(prefix)) || allowedLabels.includes(label.key);
                 });
             },
-            handleFilterLabels(labels) {
-                const filtered = filterLabels(labels);
-                // You can do something with the filtered labels here, like updating a data property
-                return filtered.labels; // or handle the error case as needed
-            },
             executionParams(row) {
                 return {
                     namespace: row.namespace,
