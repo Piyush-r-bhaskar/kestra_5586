@@ -848,23 +848,25 @@
     });
 
     const updateLabels = () => {
-        const labels = new Map();
-        const labelsQuery = route.query.labels;
+        const labelsArray = Array.isArray(route.query.labels) 
+            ? route.query.labels 
+            : route.query.labels ? [route.query.labels] : [];
 
-        const labelsArray = labelsQuery ? (Array.isArray(labelsQuery) ? labelsQuery : [labelsQuery]) : [];
-        labelsArray.forEach((label) => {
-            const separatorIndex = label.indexOf(":");
-            if (separatorIndex !== -1) {
-                labels.set(label.slice(0, separatorIndex).trim(), label.slice(separatorIndex + 1).trim());
-            }
-        });
+        const labels = new Map(
+            labelsArray
+                .map(label => label.split(":").map(part => part.trim()))
+                .filter(([key, value]) => key && value)
+        );
 
         const newLabelsFilters = Array.from(labels.entries()).map(([key, value]) => ({
             label: "labels",
-            value: `${key}: ${value}`,
+            value: `${key}:${value}`,
         }));
 
-        currentFilters.value = currentFilters.value.filter((filter) => filter.label !== "labels").concat(newLabelsFilters);
+        currentFilters.value = [
+            ...currentFilters.value.filter(filter => filter.label !== "labels"),
+            ...newLabelsFilters
+        ];
     };
 
     watch(() => route.query.labels, updateLabels);
