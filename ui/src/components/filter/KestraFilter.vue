@@ -33,6 +33,10 @@
             data-test-id="KestraFilter__select"
         >
             <template #label="{value}">
+                <!--
+                    TODO: Find a way to have persistent tags for el-select.
+                    https://github.com/kestra-io/kestra/issues/6256
+                -->
                 <Label :option="value" />
             </template>
             <template #empty>

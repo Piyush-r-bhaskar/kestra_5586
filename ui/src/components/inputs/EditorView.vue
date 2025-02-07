@@ -947,12 +947,12 @@
 
     const onUpdateMetadata = (event, shouldSave) => {
         if(shouldSave) {
-            metadata.value = {...metadata.value, ...(event.concurrency.limit === 0 ? {concurrency: null} : event)};
+            metadata.value = {...metadata.value, ...(event.concurrency?.limit === 0 ? {concurrency: null} : event)};
             onSaveMetadata();
             validateFlow(flowYaml.value)
 
         } else {
-            metadata.value = event.concurrency.limit === 0 ?  {concurrency: null} : event;
+            metadata.value = event.concurrency?.limit === 0 ?  {concurrency: null} : event;
         }
     };
 
