@@ -37,7 +37,6 @@
             }
         },
         methods: {
-            },
             labelsFromQuery() {
                 const labels = new Map();
                 (this.$route.query.labels !== undefined ?
@@ -55,11 +54,10 @@
                     });
 
                 return labels;
-            }
-        },
-        methods: {
+            },
             checked(key, value) {
-                return this.labelsFromQuery.has(key) && this.labelsFromQuery.get(key) === value;
+                return this.labelsFromQuery().has(key) && this.labelsFromQuery().get(key) === value;
+                
             },
             link(key, value) {
                 const labels = this.labelsFromQuery();
