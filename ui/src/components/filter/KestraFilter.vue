@@ -847,28 +847,28 @@
         }
     });
 
-    // Adding labels from url
-    const updateLabelsFilters = () => {
-        const labels = route.query.labels;
+    const updateLabels = () => {
+        const labels = new Map();
+        const labelsQuery = route.query.labels;
 
-        if (labels) {
-            const labelsArray = Array.isArray(labels) ? labels : [labels];
-            const newLabelsFilters = labelsArray.map(label => {
-                const [key, value] = label.split(":");
-                return {
-                    label: "labels",
-                    value: `${key.trim()}: ${value.trim()}`,
-                };
-            });
+        const labelsArray = labelsQuery ? (Array.isArray(labelsQuery) ? labelsQuery : [labelsQuery]) : [];
+        labelsArray.forEach((label) => {
+            const separatorIndex = label.indexOf(":");
+            if (separatorIndex !== -1) {
+                labels.set(label.slice(0, separatorIndex).trim(), label.slice(separatorIndex + 1).trim());
+            }
+        });
 
-            currentFilters.value = currentFilters.value.filter(filter => filter.label !== "labels").concat(newLabelsFilters);
-        } else {
-            currentFilters.value = currentFilters.value.filter(filter => filter.label !== "labels");
-        }
+        const newLabelsFilters = Array.from(labels.entries()).map(([key, value]) => ({
+            label: "labels",
+            value: `${key}: ${value}`,
+        }));
+
+        currentFilters.value = currentFilters.value.filter((filter) => filter.label !== "labels").concat(newLabelsFilters);
     };
 
-    watch(() => route.query.labels, updateLabelsFilters);
-    onMounted(updateLabelsFilters);
+    watch(() => route.query.labels, updateLabels);
+    onMounted(updateLabels);
 </script>
 
 <style lang="scss">

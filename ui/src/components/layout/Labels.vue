@@ -1,20 +1,15 @@
 <template>
     <span data-component="FILENAME_PLACEHOLDER" v-if="labels">
-        <!-- 'el-check-tag' would be a better fit but it currently lacks customization -->
-        <el-tag
+        <!-- 'el-check-tag' would be a better fit but it currently lacks customization (missing size, bold font) -->
+        <template
             v-for="(value, key) in labelMap"
             :key="key"
-            :type="checked(key, value) ? 'primary' : undefined"
-            class="me-1 labels"
-            size="small"
-            disable-transitions
-            @click="onClicked({key, value})"
         >
-            <router-link v-if="filterEnabled" :to="link(key, value)">
+            <router-link v-if="filterEnabled" :to="link(key, value)" class="me-1 labels el-tag el-tag--small" :class="{'el-tag--primary': checked(key, value)}">
                 {{ key }}: {{ value }}
             </router-link>
-            <template v-else>{{ key }}: {{ value }}</template>
-        </el-tag>
+            <div v-else class="me-1 labels el-tag el-tag--small" :class="{'el-tag--primary': checked(key, value)}">{{ key }}: {{ value }}</div>
+        </template>
     </span>
 </template>
 
@@ -62,6 +57,7 @@
             },
             checked(key, value) {
                 return this.getLabelsFromQuery().has(key) && this.getLabelsFromQuery().get(key) === value;
+                
             },
             link(key, value) {
                 const labels = this.getLabelsFromQuery();
@@ -81,18 +77,6 @@
 
                 return {name: this.$route.name, params: this.$route.params, query: qs};
             },
-            onClicked({key, value}) {
-                const currentQuery = {...this.$route.query};
-                const labels = currentQuery.labels ? currentQuery.labels.split(",") : [];
-
-                const labelIndex = labels.findIndex(label => label.startsWith(`${key}:`));
-                if (labelIndex !== -1) {
-                    labels.splice(labelIndex, 1);
-                } else {
-                    labels.push(`${key}:${value}`);
-                }
-                this.$router.push({query: {...currentQuery, labels: labels.join(",")}});
-            }
         }
     };
 </script>
