@@ -46,9 +46,10 @@
 
 .comparator {
     display: inline-block;
+
     margin: 0 0.5rem;
-    padding: 0.33rem 0.35rem;
-    border-left: 4px solid var(--ks-dialog-background);
-    border-right: 4px solid var(--ks-dialog-background);
+    padding: 0.3rem 0.35rem;
+
+    background: var(--ks-background-paused);
 }
 </style>
