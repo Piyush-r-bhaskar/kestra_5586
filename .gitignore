@@ -57,3 +57,4 @@ core/src/main/resources/gradle.properties
 **/allure-results/*
 
 *storybook.log
+ui/src/components/layout/Labels.vue
