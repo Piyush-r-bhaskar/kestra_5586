@@ -934,10 +934,15 @@ $properties: v-bind('props.propertiesWidth + "px"');
 
         & .el-tag {
             background: $filters-border-color !important;
-            color: $filters-gray-900;
+            color: var(--ks-tag-content);
 
             & .el-tag__close {
-                color: $filters-gray-900;
+                color: rgb(144, 30, 250);
+
+                &:hover{
+                    background: none !important;
+                    color: rgb(170, 92, 249);
+                }
             }
         }
     }
