@@ -43,12 +43,27 @@
 </script>
 
 <style scoped lang="scss">
+    span {
+        padding: 0.33rem 0.35rem;
+        display: inline-block;
 
-.comparator {
-    display: inline-block;
-    margin: 0 0.5rem;
-    padding: 0.33rem 0.35rem;
-    border-left: 4px solid var(--ks-dialog-background);
-    border-right: 4px solid var(--ks-dialog-background);
-}
+        .comparator {
+            background: #f6f6f6;
+            border-left: 4px solid #ffffff;
+            border-right: 4px solid #ffffff;
+
+            html.dark & {
+                background: rgba(49, 49, 49, 0.5);
+                border-color: #1e202a;
+            }
+        }
+
+        &:first-child{
+            background: #f6f6f6;
+
+            html.dark & {
+                background: rgba(49, 49, 49, 0.5);
+            }
+        }
+    }
 </style>

@@ -933,15 +933,21 @@ $properties: v-bind('props.propertiesWidth + "px"');
             0 1px 0 0 $filters-border-color inset;
 
         & .el-tag {
-            background: $filters-border-color !important;
+            padding: 0 !important;
+            padding-right: 0.30rem !important;
+            background: #ececec !important;
             color: var(--ks-tag-content);
+            overflow: hidden;
+
+            html.dark & {
+                background: rgba(24, 24, 24, 1) !important;
+            }
 
             & .el-tag__close {
-                color: rgb(144, 30, 250);
+                color: var(--ks-content-link);
 
                 &:hover{
                     background: none !important;
-                    color: rgb(170, 92, 249);
                 }
             }
         }
