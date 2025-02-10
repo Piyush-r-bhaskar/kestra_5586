@@ -872,16 +872,33 @@
                 .filter(([key, value]) => key && value)
         );
 
-        const newLabelsFilters = Array.from(labels.entries()).map(([key, value]) => ({
-            label: "labels",
-            value: `${key}:${value}`,
-        }));
+        const newLabelsFilters = Array.from(labels.entries())
+            .map(([key, value]) => ({
+                label: "labels",
+                value: `${key}:${value}`,
+            }));
 
-        currentFilters.value = [
-            ...currentFilters.value.filter(filter => filter.label !== "labels"),
-            ...newLabelsFilters
-        ];
+        const existingLabelValues = new Set(currentFilters.value
+            .filter(filter => filter.label === "labels")
+            .map(filter => filter.value)
+        );
+
+        newLabelsFilters.forEach(newLabel => {
+            if (!existingLabelValues.has(newLabel.value)) {
+                currentFilters.value.push(newLabel);
+            }
+        });
+
+        currentFilters.value = currentFilters.value
+            .filter(filter => {
+                if (filter.label === "labels" && !labels
+                    .has(filter.value.split(":")[0])) {
+                    return false;
+                }
+                return true;
+            });
     };
+
 
     watch(() => route.query.labels, updateLabels);
     onMounted(updateLabels);
