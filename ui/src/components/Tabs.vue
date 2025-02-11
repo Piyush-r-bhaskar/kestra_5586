@@ -157,11 +157,17 @@
                 explorerWidth: (state) => state.editor.explorerWidth,
             }),
             containerClass() {
+                const isLockedTab = this.activeTab.locked;
+
                 if (this.activeTab.containerClass) {
-                    return {[this.activeTab.containerClass] : true};
+                    return {[this.activeTab.containerClass]: true};
                 }
 
-                return {"container" : true, "mt-4": true};
+                return {
+                    "container": !isLockedTab,
+                    "mt-4": !isLockedTab,
+                    "px-0": isLockedTab
+                };
             },
             activeTab() {
                 return this.tabs
