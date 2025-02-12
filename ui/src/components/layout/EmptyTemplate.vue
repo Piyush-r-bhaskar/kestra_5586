@@ -7,6 +7,7 @@
 <style lang="scss" scoped>
     .empty-template {
         margin-top: -0.900rem;
+        padding: 3rem 0 0;
         text-align: center;
         background-repeat: no-repeat;
         background-image: url("../../assets/empty-page-light.svg#file");
