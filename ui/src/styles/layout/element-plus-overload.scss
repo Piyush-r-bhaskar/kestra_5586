@@ -748,7 +748,7 @@ form.ks-horizontal {
 // dropdown
 .el-dropdown__popper {
     font-size: var(--el-font-size-small);
-    --el-dropdown-menuItem-hover-fill: var(--bs-gray-300);
+    --el-dropdown-menuItem-hover-fill: var(--ks-select-hover);
     --el-dropdown-menuItem-hover-color: var(--ks-content-primary);
 
     &.separator-m-0 .el-dropdown-menu__item--divided {
@@ -764,19 +764,14 @@ form.ks-horizontal {
 
     .el-dropdown-menu {
         padding: 0;
-        background-color: transparent;
+        background-color: var(--ks-select-background);
+        border: 1px solid var(--ks-select-border);
     }
 
     // no longer require focus to get hover effect on dropdowns
     .el-dropdown-menu__item {
-        &:first-child {
-            border-top-left-radius: calc(var(--el-border-radius-base) * 2);
-            border-top-right-radius: calc(var(--el-border-radius-base) * 2);
-        }
-        &:last-child {
-            border-bottom-left-radius: calc(var(--el-border-radius-base) * 2);
-            border-bottom-right-radius: calc(var(--el-border-radius-base) * 2);
-        }
+        border-radius: 0.25rem;
+
         &:is(li) {
             display: flex;
             gap: .5rem;
@@ -906,6 +901,7 @@ form.ks-horizontal {
 
 // loading
 .el-loading-mask {
+    -webkit-backdrop-filter: blur(3px) opacity(0.85); //Safari Support
     backdrop-filter: blur(3px) opacity(0.85);
     inset: 0;
     background: none;
