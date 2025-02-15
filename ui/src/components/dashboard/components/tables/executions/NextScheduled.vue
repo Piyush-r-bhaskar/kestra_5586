@@ -15,6 +15,11 @@
 
         <div class="pt-4" v-if="loading">
             <el-table :data="skeletonData" class="scheduled" :height="240">
+                <el-table-column :label="$t('dashboard.id')" width="100">
+                    <template #default>
+                        <el-skeleton-item variant="text" style="width: 80px" />
+                    </template>
+                </el-table-column>
                 <el-table-column :label="$t('namespace')">
                     <template #default>
                         <el-skeleton-item variant="text" style="width: 100%" />
@@ -25,12 +30,7 @@
                         <el-skeleton-item variant="text" style="width: 100%" />
                     </template>
                 </el-table-column>
-                <el-table-column :label="$t('trigger')" width="100">
-                    <template #default>
-                        <el-skeleton-item variant="text" style="width: 80px" />
-                    </template>
-                </el-table-column>
-                <el-table-column :label="$t('next')" width="120">
+                <el-table-column :label="$t('dashboard.next_execution_date')" width="120">
                     <template #default>
                         <el-skeleton-item variant="text" style="width: 100px" />
                     </template>
@@ -74,7 +74,7 @@
                         />
                     </template>
                 </el-table-column>
-                <el-table-column :label="$t('id')" width="100">
+                <el-table-column :label="$t('dashboard.id')" width="100">
                     <template #default="scope">
                         <RouterLink :to="{name: 'admin/triggers'}">
                             <el-tooltip
@@ -132,7 +132,7 @@
                         </RouterLink>
                     </template>
                 </el-table-column>
-                <el-table-column :label="$t('next')" width="120">
+                <el-table-column :label="$t('dashboard.next_execution_date')">
                     <template #default="scope">
                         <date-ago :date="scope.row.triggerContext.nextExecutionDate" />
                     </template>
