@@ -522,6 +522,24 @@
                         })),
                     );
 
+                    const updateChildren = (items, path, newChildren) => {
+                        items.forEach((item, index) => {
+                            if (this.getPath(item.id) === path) {
+                                // Update children if the fileName matches
+                                items[index].children = newChildren;
+                            } else if (Array.isArray(item.children)) {
+                                // Recursively search in children array
+                                updateChildren(item.children, path, newChildren);
+                            }
+                        });
+                    };
+
+                    updateChildren(
+                        this.items,
+                        this.getPath(node.data.id),
+                        children,
+                    );
+
                     resolve(children);
                 }
             },

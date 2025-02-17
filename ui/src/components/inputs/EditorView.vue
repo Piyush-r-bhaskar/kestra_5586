@@ -205,9 +205,11 @@
                             <template #dropdown>
                                 <el-dropdown-menu>
                                     <el-dropdown-item @click="$refs.filePicker.click()">
+                                        <File class="me-2" />
                                         {{ $t("namespace files.import.files") }}
                                     </el-dropdown-item>
                                     <el-dropdown-item @click="$refs.folderPicker.click()">
+                                        <Folder class="me-2" />
                                         {{ $t("namespace files.import.folder") }}
                                     </el-dropdown-item>
                                 </el-dropdown-menu>
@@ -441,6 +443,8 @@
     import FolderPlus from "vue-material-design-icons/FolderPlus.vue";
     import Download from "vue-material-design-icons/Download.vue";
     import Plus from "vue-material-design-icons/Plus.vue";
+    import File from "vue-material-design-icons/File.vue";
+    import Folder from "vue-material-design-icons/Folder.vue";
 
     import TypeIcon from "../utils/icons/Type.vue"
 
@@ -455,15 +459,16 @@
     import TaskEditor from "../flows/TaskEditor.vue";
     import MetadataEditor from "../flows/MetadataEditor.vue";
     import Editor from "./Editor.vue";
-    import {SECTIONS, storageKeys} from "../../utils/constants.js";
     import LowCodeEditor from "../inputs/LowCodeEditor.vue";
+    import EditorButtons from "./EditorButtons.vue";
+    import Drawer from "../Drawer.vue";
+    import NoCode from "../code/NoCode.vue";
+    import {ElMessageBox} from "element-plus";
+
+    import {SECTIONS, storageKeys} from "../../utils/constants.js";
     import {editorViewTypes} from "../../utils/constants";
     import {Utils} from "@kestra-io/ui-libs";
     import {apiUrl} from "override/utils/route";
-    import EditorButtons from "./EditorButtons.vue";
-    import Drawer from "../Drawer.vue";
-    import {ElMessageBox} from "element-plus";
-    import NoCode from "../code/NoCode.vue";
     import localUtils from "../../utils/utils";
 
     const store = useStore();
@@ -1708,7 +1713,7 @@
             background: url("../../assets/empty-ns-files.png") no-repeat center;
             background-size: contain;
             width: 100%;
-            height: 150px;
+            height: auto;
             margin-bottom: 1rem;
         }
 
