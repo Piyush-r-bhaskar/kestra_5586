@@ -419,6 +419,7 @@
             ...mapState({
                 flow: (state) => state.flow.flow,
                 explorerVisible: (state) => state.editor.explorerVisible,
+                treeRefreshTrigger: (state) => state.editor.treeRefreshTrigger
             }),
             folders() {
                 function extractPaths(basePath = "", array) {
@@ -501,12 +502,12 @@
                         namespace: this.currentNS ?? this.$route.params.namespace,
                     };
                     const items = await this.readDirectory(payload);
-
+                    
                     this.renderNodes(items);
                     this.items = this.sorted(this.items);
-                }
-
-                if (node.level >= 1) {
+                    this.$store.commit("editor/setTreeData", this.items);
+                    resolve(this.items);
+                } else if (node.level >= 1) {
                     const payload = {
                         namespace: this.currentNS ?? this.$route.params.namespace,
                         path: this.getPath(node),
@@ -519,25 +520,6 @@
                             id: Utils.uid(),
                             leaf: item.type === "File",
                         })),
-                    );
-
-
-                    const updateChildren = (items, path, newChildren) => {
-                        items.forEach((item, index) => {
-                            if (this.getPath(item.id) === path) {
-                                // Update children if the fileName matches
-                                items[index].children = newChildren;
-                            } else if (Array.isArray(item.children)) {
-                                // Recursively search in children array
-                                updateChildren(item.children, path, newChildren);
-                            }
-                        });
-                    };
-
-                    updateChildren(
-                        this.items,
-                        this.getPath(node.data.id),
-                        children,
                     );
 
                     resolve(children);
@@ -1059,6 +1041,19 @@
                 immediate: true,
                 deep: true,
             },
+            treeRefreshTrigger: {
+                async handler() {
+                    if (this.$refs.tree) {
+                        this.items = undefined;
+                        const items = await this.readDirectory({
+                            namespace: this.currentNS ?? this.$route.params.namespace
+                        });
+                        this.renderNodes(items);
+                        this.items = this.sorted(this.items);
+                    }
+                },
+                immediate: true
+            }
         },
     };
 </script>
