@@ -3,14 +3,15 @@
         <div v-for="(history, index) in histories" :key="'timeline-' + index" class="timeline-item">
             <div class="timeline-content">
                 <span class="timeline-date">{{ $filters.date(history.date, 'iso') }}</span>
+                <div class="timeline-dot" :style="getStyle(history.state)" />
                 <span class="timeline-state">{{ history.state }}</span>
             </div>
-            <div class="timeline-dot" :style="getStyle(history.state)" />
         </div>
     </div>
 </template>
 
 <script setup>
+
     defineProps({
         histories: {
             type: Array,
@@ -32,16 +33,33 @@
     align-items: center;
     justify-content: space-between;
     padding: 20px;
+    position: relative;
     margin-bottom: 10px;
     border-radius: 5px;
     background-color: var(--ks-background-body);
     box-shadow: 0px 2px 4px 0px var(--ks-card-shadow);
     border: 1px solid var(--ks-border-primary);
 
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: start;
+        padding: 30px 20px;
+    }
+
     .timeline-item {
         position: relative;
         text-align: center;
         flex: 1;
+
+        @media (max-width: 768px) {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: center;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
 
         &:not(:last-child)::after {
             content: '';
@@ -53,6 +71,15 @@
             height: 1px;
             background-color: var(--ks-border-primary);
             z-index: 0;
+
+            @media (max-width: 768px) {
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 1px;
+                height: 20px;
+                margin-top: 6px;
+            }
         }
 
         .timeline-dot {
@@ -64,6 +91,14 @@
             height: 12px;
             border-radius: 50%;
             z-index: 10;
+
+            @media (max-width: 768px) {
+                position: relative;
+                display: inline-block;
+                top: auto;
+                left: auto;
+                transform: none;
+            }
         }
 
         .timeline-content {
@@ -74,14 +109,22 @@
             font-size: 12px;
 
             .timeline-date {
-                margin-bottom: 35px;
+                margin-bottom: 1rem;
                 font-size: 12px;
                 color: var(--ks-content-tertiary);
+
+                @media (max-width: 768px) {
+                    margin-bottom: 0;
+                }
             }
 
             .timeline-state {
-                text-transform: uppercase;
+                margin-top: 0.5rem;
                 color: var(--ks-content-secondary);
+
+                @media (max-width: 768px) {
+                    margin-top: 0;
+                }
             }
         }
     }
