@@ -11,8 +11,6 @@
 </template>
 
 <script setup>
-    import {defineProps} from "vue";
-
     defineProps({
         histories: {
             type: Array,
@@ -36,7 +34,7 @@
     padding: 20px;
     margin-bottom: 10px;
     border-radius: 5px;
-    background-color: var(--ks-background-card);
+    background-color: var(--ks-background-body);
     box-shadow: 0px 2px 4px 0px var(--ks-card-shadow);
     border: 1px solid var(--ks-border-primary);
 
