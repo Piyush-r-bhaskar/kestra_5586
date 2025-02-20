@@ -13,11 +13,6 @@
 <script setup>
     import {defineProps} from "vue";
 
-    const StatusRemap = {
-        "failed": "error",
-        "warn": "warning",
-    };
-
     defineProps({
         histories: {
             type: Array,
@@ -26,7 +21,7 @@
     });
 
     const getStyle = (state) => {
-        const statusVarname = (StatusRemap[state.toLowerCase()] ?? state)?.toLowerCase();
+        const statusVarname = state.toLowerCase();
         return {
             backgroundColor: `var(--ks-chart-${statusVarname})`
         };
