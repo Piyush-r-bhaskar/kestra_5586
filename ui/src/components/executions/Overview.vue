@@ -77,7 +77,7 @@
             </el-col>
         </el-row>
 
-        <el-table table-layout="auto" fixed :data="items" :show-header="false" class="mb-0">
+        <el-table table-layout="auto" fixed :data="items" :show-header="false" class="mb-3">
             <el-table-column prop="key" :label="$t('key')" />
 
             <el-table-column prop="value" :label="$t('value')">
@@ -108,6 +108,28 @@
                 </template>
             </el-table-column>
         </el-table>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <el-button
+                :disabled="!hasPreviousExecution"
+                @click="navigateExecution('previous')"
+            >
+                <el-icon class="el-icon--left">
+                    <ChevronLeft />
+                </el-icon>
+                {{ $t('prev_executions') }}
+            </el-button>
+            
+            <el-button 
+                :disabled="!hasNextExecution" 
+                @click="navigateExecution('next')"
+            >
+                {{ $t('next_executions') }}
+                <el-icon class="el-icon--right">
+                    <ChevronRight />
+                </el-icon>
+            </el-button>
+        </div>
 
         <div v-if="execution.trigger" class="my-5">
             <h5>{{ $t("trigger") }}</h5>
@@ -168,8 +190,11 @@
     import Alert from "vue-material-design-icons/Alert.vue";
     import ChevronDown from "vue-material-design-icons/ChevronDown.vue";
     import ChevronUp from "vue-material-design-icons/ChevronUp.vue";
+    import ChevronLeft from "vue-material-design-icons/ChevronLeft.vue";
+    import ChevronRight from "vue-material-design-icons/ChevronRight.vue";
 
     export default {
+        name: "Overview",
         components: {
             ChangeExecutionStatus,
             Duration,
@@ -188,7 +213,9 @@
             LogLine,
             Alert,
             ChevronDown,
-            ChevronUp
+            ChevronUp,
+            ChevronLeft,
+            ChevronRight
         },
         emits: ["follow"],
         methods: {
@@ -240,6 +267,51 @@
             isReplay() {
                 return this.execution.labels?.find( it => it.key === "system.replay" && (it.value === "true" || it.value === true)) !== undefined;
             },
+            async navigateExecution(direction) {
+                try {
+                    const params = {
+                        namespace: this.execution.namespace,
+                        flowId: this.execution.flowId,
+                        startDate: this.execution.state.startDate,
+                        id: this.execution.id,
+                        direction
+                    };
+                    
+                    const result = await this.$store.dispatch("execution/findAdjacentExecution", params);
+                    if (result && result.id) {
+                        this.$router.push({
+                            name: "executions/update",
+                            params: {
+                                namespace: result.namespace,
+                                flowId: result.flowId,
+                                id: result.id
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error("Failed to navigate:", error);
+                }
+            },
+            async checkAdjacentExecutions() {
+                try {
+                    const params = {
+                        namespace: this.execution.namespace,
+                        flowId: this.execution.flowId,
+                        startDate: this.execution.state.startDate,
+                        id: this.execution.id
+                    };
+                    
+                    const [previousResult, nextResult] = await Promise.all([
+                        this.$store.dispatch("execution/findAdjacentExecution", {...params, direction: "previous"}),
+                        this.$store.dispatch("execution/findAdjacentExecution", {...params, direction: "next"})
+                    ]);
+                    
+                    this.hasPreviousExecution = !!previousResult?.id;
+                    this.hasNextExecution = !!nextResult?.id;
+                } catch (error) {
+                    console.error("Failed to check adjacent executions:", error);
+                }
+            },
             load() {
                 this.$store
                     .dispatch(
@@ -283,6 +355,14 @@
                 if (oldValue.name === newValue.name && this.execution.id !== this.$route.params.id) {
                     this.load();
                 }
+            },
+            execution: {
+                handler(newExecution) {
+                    if (newExecution) {
+                        this.checkAdjacentExecutions();
+                    }
+                },
+                immediate: true
             }
         },
         data() {
@@ -291,6 +371,8 @@
                 errorLogs: undefined,
                 errorLogsMore: false,
                 errorLast: undefined,
+                hasPreviousExecution: false,
+                hasNextExecution: false,
             };
         },
         computed: {
