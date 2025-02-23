@@ -312,10 +312,7 @@
                         return null;
                     }
 
-                    const executions = result.results.sort((a, b) => 
-                        new Date(b.state.startDate) - new Date(a.state.startDate)
-                    );
-
+                    const executions = result.results;
                     const currentIndex = executions.findIndex(e => e.id === this.execution.id);
                     if (currentIndex === -1) {
                         return null;
