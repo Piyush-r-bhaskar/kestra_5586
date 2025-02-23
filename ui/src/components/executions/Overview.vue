@@ -112,19 +112,19 @@
         <div class="d-flex justify-content-between align-items-center mt-4">
             <el-button
                 :disabled="!hasPreviousExecution"
-                @click="navigateExecution('previous')"
+                @click="navigateToExecution('previous')"
             >
                 <el-icon class="el-icon--left">
                     <ChevronLeft />
                 </el-icon>
-                {{ $t('prev_executions') }}
+                {{ $t('prev_execution') }}
             </el-button>
             
             <el-button 
                 :disabled="!hasNextExecution" 
-                @click="navigateExecution('next')"
+                @click="navigateToExecution('next')"
             >
-                {{ $t('next_executions') }}
+                {{ $t('next_execution') }}
                 <el-icon class="el-icon--right">
                     <ChevronRight />
                 </el-icon>
@@ -267,51 +267,6 @@
             isReplay() {
                 return this.execution.labels?.find( it => it.key === "system.replay" && (it.value === "true" || it.value === true)) !== undefined;
             },
-            async navigateExecution(direction) {
-                try {
-                    const params = {
-                        namespace: this.execution.namespace,
-                        flowId: this.execution.flowId,
-                        startDate: this.execution.state.startDate,
-                        id: this.execution.id,
-                        direction
-                    };
-                    
-                    const result = await this.$store.dispatch("execution/findAdjacentExecution", params);
-                    if (result && result.id) {
-                        this.$router.push({
-                            name: "executions/update",
-                            params: {
-                                namespace: result.namespace,
-                                flowId: result.flowId,
-                                id: result.id
-                            }
-                        });
-                    }
-                } catch (error) {
-                    console.error("Failed to navigate:", error);
-                }
-            },
-            async checkAdjacentExecutions() {
-                try {
-                    const params = {
-                        namespace: this.execution.namespace,
-                        flowId: this.execution.flowId,
-                        startDate: this.execution.state.startDate,
-                        id: this.execution.id
-                    };
-                    
-                    const [previousResult, nextResult] = await Promise.all([
-                        this.$store.dispatch("execution/findAdjacentExecution", {...params, direction: "previous"}),
-                        this.$store.dispatch("execution/findAdjacentExecution", {...params, direction: "next"})
-                    ]);
-                    
-                    this.hasPreviousExecution = !!previousResult?.id;
-                    this.hasNextExecution = !!nextResult?.id;
-                } catch (error) {
-                    console.error("Failed to check adjacent executions:", error);
-                }
-            },
             load() {
                 this.$store
                     .dispatch(
@@ -343,7 +298,66 @@
                             this.errorLast = undefined;
                         }
                     })
-            }
+            },
+            async getFlowExecutions() {
+                try {
+                    const params = {
+                        namespace: this.execution.namespace,
+                        flowId: this.execution.flowId,
+                        pageSize: 100
+                    };
+                    
+                    const result = await this.$store.dispatch("execution/findExecutions", params);
+                    if (!result || !result.results || !result.results.length) {
+                        return null;
+                    }
+
+                    const executions = result.results.sort((a, b) => 
+                        new Date(b.state.startDate) - new Date(a.state.startDate)
+                    );
+
+                    const currentIndex = executions.findIndex(e => e.id === this.execution.id);
+                    if (currentIndex === -1) {
+                        return null;
+                    }
+
+                    return {executions, currentIndex};
+                } catch (error) {
+                    console.error("Failed to fetch executions:", error);
+                    return null;
+                }
+            },
+            async navigateToExecution(direction) {
+                const result = await this.getFlowExecutions();
+                if (!result) return;
+
+                const {executions, currentIndex} = result;
+                const targetIndex = direction === "previous" ? currentIndex + 1 : currentIndex - 1;
+
+                if (targetIndex >= 0 && targetIndex < executions.length) {
+                    const targetExecution = executions[targetIndex];
+                    this.$router.push({
+                        name: "executions/update",
+                        params: {
+                            namespace: targetExecution.namespace,
+                            flowId: targetExecution.flowId,
+                            id: targetExecution.id
+                        }
+                    });
+                }
+            },
+            async updateNavigationStatus() {
+                const result = await this.getFlowExecutions();
+                if (!result) {
+                    this.hasPreviousExecution = false;
+                    this.hasNextExecution = false;
+                    return;
+                }
+
+                const {executions, currentIndex} = result;
+                this.hasPreviousExecution = currentIndex < executions.length - 1;
+                this.hasNextExecution = currentIndex > 0;
+            },
         },
         mounted() {
             if (this.isFailed()) {
@@ -359,7 +373,7 @@
             execution: {
                 handler(newExecution) {
                     if (newExecution) {
-                        this.checkAdjacentExecutions();
+                        this.updateNavigationStatus();
                     }
                 },
                 immediate: true

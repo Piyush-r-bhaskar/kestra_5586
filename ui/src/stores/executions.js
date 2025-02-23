@@ -23,28 +23,6 @@ export default {
         flowsExecutable: []
     },
     actions: {
-        async findAdjacentExecution(_, options) {
-            const {direction, ...queryParams} = options;
-            const sortOrder = direction === "previous" ? "desc" : "asc";
-            const dateComparison = direction === "previous" ? "lt" : "gt";
-            
-            const query = {
-                namespace: queryParams.namespace,
-                flowId: queryParams.flowId,
-                [`state.startDate.${dateComparison}`]: queryParams.startDate,
-                sort: `state.startDate:${sortOrder}`,
-                page: 1,
-                size: 1
-            };
-            
-            try {
-                const response = await this.$http.get(`${apiUrl(this)}/executions/search`, {params: query});
-                return response.data.results[0] || null;
-            } catch (error) {
-                console.error("Failed to get execution:", error);
-                return null;
-            }
-        },
         restartExecution(_, options) {
             return this.$http.post(
                 `${apiUrl(this)}/executions/${options.executionId}/restart`,
