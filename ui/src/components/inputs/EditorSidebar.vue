@@ -125,6 +125,7 @@
                             name: data.fileName,
                             extension: data.fileName.split('.').pop(),
                             path: getPath(node),
+                            size: data.size || null
                         })
                         : undefined
             "
@@ -817,6 +818,7 @@
                         name: NAME,
                         path,
                         extension: extension,
+                        size: file.size || null
                     });
 
                     this.dialog.folder = path.substring(0, path.lastIndexOf("/"));

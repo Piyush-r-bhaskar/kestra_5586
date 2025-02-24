@@ -122,9 +122,16 @@
         </div>
     </div>
     <div v-bind="$attrs" class="main-editor" v-loading="isLoading">
+        <ImagePreview
+            v-if="isImageFile"
+            :file-path="filePath"
+            :file-name="fileName"
+            :file-size="fileSize"
+            :namespace="namespace"
+        />
         <div
             id="editorWrapper"
-            v-if="combinedEditor || viewType === editorViewTypes.SOURCE"
+            v-else-if="combinedEditor || viewType === editorViewTypes.SOURCE"
             :class="combinedEditor ? 'editor-combined' : ''"
             style="flex: 1;"
         >
@@ -353,6 +360,7 @@
     import {ElMessageBox} from "element-plus";
     import NoCode from "../code/NoCode.vue";
     import localUtils from "../../utils/utils";
+    import ImagePreview from "./ImagePreview.vue";
 
     const store = useStore();
     const router = useRouter();
@@ -1280,6 +1288,18 @@
 
         return tab.name === currentTab.value.name;
     }
+
+    const isImageFile = computed(() => {
+        if (!currentTab.value?.path) return false;
+        const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"];
+        return imageExtensions.some(ext => 
+            currentTab.value.path.toLowerCase().endsWith(ext.toLowerCase())
+        );
+    });
+
+    const filePath = computed(() => currentTab.value.path);
+    const fileName = computed(() => currentTab.value.name);
+    const fileSize = computed(() => currentTab.value.size);
 
     watch(currentTab, (current, previous) => {
         const isCurrentFlow = current?.name === "Flow";

@@ -22,7 +22,7 @@ export default {
             state.explorerWidth = width > 40 ? 40 : width < 20 ? 20 : width;
         },
         changeOpenedTabs(state, payload) {
-            const {action, name, extension, index, persistent, dirty, path, flow} =
+            const {action, name, extension, index, persistent, dirty, path, flow, size} =
                 payload;
 
             if (action === "open") {
@@ -36,7 +36,7 @@ export default {
                 let isDirty;
 
                 if (index === -1) {
-                    state.tabs.push({name, extension, persistent, path, flow});
+                    state.tabs.push({name, extension, persistent, path, flow, size});
                     isDirty = false;
                 } else {
                     isDirty = state.tabs[index].dirty;
@@ -48,7 +48,8 @@ export default {
                     persistent,
                     dirty: isDirty,
                     path,
-                    flow
+                    flow,
+                    size
                 };
             } else if (action === "close") {
                 state.tabs = state.tabs.filter((tab) => {
