@@ -122,6 +122,7 @@
         >
             <KestraIcon :tooltip="$t('search')" placement="bottom">
                 <el-button
+                    :disabled="!!props.searchCallback"
                     :icon="Magnify"
                     @click="triggerSearch"
                     class="rounded-0"
@@ -240,7 +241,7 @@
         }
         return valueOptions.value.filter((o) =>
             o.label.toLowerCase().startsWith(prefixFilter.value),
-        );
+        ) || [];
     });
 
     const select = ref<InstanceType<typeof ElSelect> | null>(null);
@@ -274,6 +275,7 @@
 
                 if (o.key === "timeRange") comparator = "relative_date";
                 if (o.key === "date") comparator = "absolute_date";
+                if (o.key === "childFilter") comparator = "child";
 
                 return comparator === option.label;
             })[0];
@@ -405,7 +407,7 @@
             );
             if (parentIndex !== -1) {
                 if (
-                    ["log level"].includes(
+                    ["status", "log level"].includes(
                         lastClickedParent.value.toLowerCase(),
                     )
                 ) {
@@ -595,8 +597,15 @@
         () => route.query,
         (q: any) => {
             // Handling change of label filters from direct click events
-            const routeFilters = decodeParams(route.path, q, props.include, OPTIONS);
-            currentFilters.value = routeFilters;
+            if (
+                Object.keys(q).length === 0 ||
+                Object.keys(q).some(key => key.startsWith("filters[labels]"))
+            ) {
+                const routeFilters = decodeParams(route.name, q, props.include, OPTIONS);
+                currentFilters.value = routeFilters;
+            }
+
+
         },
         {immediate: true},
     );
@@ -628,9 +637,13 @@
                 ["labels", "details"].includes(wholeSearchContent.at(-2)?.label) ||
                 wholeSearchContent.at(-2)?.value?.length === 0
             ) {
-                // Adding value to preceding empty filter
-                // TODO Provide a way for user to escape infinite labels & details loop (you can never fallback to a new filter, any further text will be added as a value to the filter)
-                wholeSearchContent.at(-2)?.value?.push(wholeSearchContent.at(-1));
+                if(wholeSearchContent.at(-2)?.label === "child") {
+                    if (typeof wholeSearchContent.at(-1) === "string") wholeSearchContent = [];
+                } else {
+                    // Adding value to preceding empty filter
+                    // TODO Provide a way for user to escape infinite labels & details loop (you can never fallback to a new filter, any further text will be added as a value to the filter)
+                    wholeSearchContent.at(-2)?.value?.push(wholeSearchContent.at(-1));
+                }
             } else {
                 // Adding text search string
                 const label = t("filters.options.text");
@@ -673,14 +686,14 @@
     const triggerSearch = () => {
         if (props.searchCallback) return;
         else {
-            router.push({query: encodeParams(route.path, currentFilters.value, OPTIONS)});
+            router.push({query: encodeParams(route.name, currentFilters.value, OPTIONS)});
         }
     };
 
     // Include parameters from URL directly to filter
     onMounted(() => {
         if (props.decode) {
-            const decodedParams = decodeParams(route.path, route.query, props.include, OPTIONS);
+            const decodedParams = decodeParams(route.name, route.query, props.include, OPTIONS);
             currentFilters.value = decodedParams.map((item: any) => {
                 if (item.label === "absolute_date") {
                     return {
@@ -751,7 +764,7 @@
                     comparator: COMPARATORS.EQUALS,
                     persistent: true,
                 });
-            }            
+            }
         }
     });
 
